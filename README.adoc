@@ -1,0 +1,91 @@
+= TGE: a programming language
+
+[verse,John Lennon]
+____
+Or play the game existence to the end
+Of the beginning.
+____
+
+***
+
+This is to be a variant of classical FORTH,footnote:[There will be no
+effort to comply with ‘standard Forth’, which we would rather pretend
+does not exist.] demonstrating the world’s first implementation of
+_continuation threading_. We keep being told that continuation
+threading is “trampolines,” but we know nothing of trampolines, other
+than that some others use things by that name on executable stacks. We
+are not using executable stacks. What we _do know_ is we believe we
+have dreamed up a way to do proper tail calls in separately compiled
+C, without stack switches or Cheney on the MTA. The technique also
+should work in Ada, Fortran, and other languages.
+
+It is hoped TGE (The Game Existence) will be useful as a target
+language for higher-level compilers.
+
+The implementation rests on several observations:
+
+* A proper tail call is a _goto_, but made safe by carrying with it
+  procedure parameters.
+
+* Therefore, to implement a proper tail call, one need only find a way
+  to implement a _goto_ and pass procedure parameters.
+
+* Passing procedure parameters _need not be done by the C ABI_.
+  Parameters can instead be passed by any means, inside some data
+  structure passed the usual way from procedure to
+  procedure.footnote:[It is, in fact, peculiar stack frames are
+  treated as if they were the natural way to pass data, and any
+  deviation from that an oddity. Stack frames are merely all a large
+  proportion of programmers today can imagine. If procedures are
+  first-class objects, then procedures themselves can be pushed to
+  data stacks, and system stack frames are superfluous. Even if merely
+  _an instruction pointer_ be accessible and pushable to a data stack,
+  then system stack frames become superfluous.]
+
+* So also each procedure receives the information necessary to
+  calculate what procedure will follow it. Thus the name
+  _continuation_ threading.
+
+* Nevertheless, it is not possible simply to _jump_ to the next
+  procedure, because there is a C execution frame on the the system
+  stack. Therefore some kind of interpreter or related elaboration is
+  necessary, and this is why the technique is _threading_ rather than
+  straight compilation.
+
+* An intermediate observation is a general one that demystifies
+  continuation-passing style. It is that continuation-passing style is
+  almost indistinguishable from the thrush combinator. The thrush
+  combinator itself is merely writing +&#x28;&#x28;&#x7E;> a b c&#x29;
+  x&#x29;+ instead of +&#x28;c &#x28;b &#x28;a x&#x29;&#x29;&#x29;+.
+  To make this continuation-passing style, include another parameter
+  +k+ and call the thrush like this: +&#x28;lambda &#x28;x k&#x29;
+  &#x28;&#x28;&#x7E;> a b c k&#x29; x&#x29;&#x29;+.
+
+* Let us apply this intermediate observation to the problem posed by
+  the preceding observation. The procedures +a+, +b+, and +c+ can be
+  called in the ordinary way, because they will return and the system
+  stack will be restored. It is the call to +k+ that poses
+  difficulties. So suppose instead of calling +k+ we return the
+  address of +k+ to the caller. Then the caller can call +k+, or pass
+  its address to its own caller, and proper tail calls are preserved.
+
+* However, notice something interesting about the foregoing Scheme
+  code: +k+ is none other than the next procedure after the current
+  one. But we are not implementing Scheme. We are implementing FORTH.
+  Except in unusual circumstances, the next procedure after the
+  current one is simply the next word in concatenative sequence. Thus
+  we do not have to return any address at all. We merely need move the
+  instruction pointer. Branching, too, can be handled one way or
+  another by manipulation of the instruction pointer.
+
+* We have to be careful, nevertheless, about instruction pointers.
+  These cannot be simple addresses, as in classical FORTH. In standard
+  C, a pointer is defined only for those addresses that lie between
+  the beginning of an array and one past its end, inclusively. The
+  array in which +k+ sits as an instruction is different from the
+  array in which +a+, +b+, and +c+ sit, and so here there need to be
+  two intruction pointer styles that differ in some non-trivial
+  fashion. We could be fancy about it, but the simplest thing to do is
+  to make sure the base address of every array pointed into is
+  presented to the C compiler. Another approach is to use the array
+  base address, plus an offset, _as_ the instruction pointer.
