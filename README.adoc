@@ -54,11 +54,11 @@ The implementation rests on several observations:
 * An intermediate observation is a general one that demystifies
   continuation-passing style. It is that continuation-passing style is
   almost indistinguishable from the thrush combinator. The thrush
-  combinator itself is merely writing __({empty}({empty}~> a b c)
+  combinator itself is merely writing __({empty}({empty}-> a b c)
   x)__ instead of _(c (b (a x)))_.
   To make this continuation-passing style, include another parameter
   _k_ and call the thrush like this: __(lambda (x k)
-  ({empty}({empty}~> a b c k) x))__.
+  ({empty}({empty}-> a b c k) x))__.
 
 * Let us apply this intermediate observation to the problem posed by
   the preceding observation. The procedures _a_, _b_, and _c_ can be
