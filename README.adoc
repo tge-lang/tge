@@ -57,7 +57,7 @@ The implementation rests on several observations:
   combinator itself is merely writing _( {empty}({empty}-> a b c) x)_ instead of _(c (b (a x)))_.
   To make this continuation-passing style, include another parameter
   _k_ and call the thrush like this: __(lambda (x k)
-  ({empty}({empty}-> a b c k) x))__.
+  ( ({empty}-> a b c k) x))__.
 
 * Let us apply this intermediate observation to the problem posed by
   the preceding observation. The procedures _a_, _b_, and _c_ can be
