@@ -54,22 +54,22 @@ The implementation rests on several observations:
 * An intermediate observation is a general one that demystifies
   continuation-passing style. It is that continuation-passing style is
   almost indistinguishable from the thrush combinator. The thrush
-  combinator itself is merely writing +((~> a b c)
-  x)+ instead of +(c (b (a x)))+.
+  combinator itself is merely writing _((~> a b c)
+  x)_ instead of _(c (b (a x)))_.
   To make this continuation-passing style, include another parameter
-  +k+ and call the thrush like this: +(lambda (x k)
-  ((~> a b c k) x))+.
+  _k_ and call the thrush like this: _(lambda (x k)
+  ((~> a b c k) x))_.
 
 * Let us apply this intermediate observation to the problem posed by
-  the preceding observation. The procedures +a+, +b+, and +c+ can be
+  the preceding observation. The procedures _a_, _b_, and _c_ can be
   called in the ordinary way, because they will return and the system
-  stack will be restored. It is the call to +k+ that poses
-  difficulties. So suppose instead of calling +k+ we return the
-  address of +k+ to the caller. Then the caller can call +k+, or pass
+  stack will be restored. It is the call to _k_ that poses
+  difficulties. So suppose instead of calling _k_ we return the
+  address of _k_ to the caller. Then the caller can call _k_, or pass
   its address to its own caller, and proper tail calls are preserved.
 
 * However, notice something interesting about the foregoing Scheme
-  code: +k+ is none other than the next procedure after the current
+  code: _k_ is none other than the next procedure after the current
   one. But we are not implementing Scheme. We are implementing FORTH.
   Except in unusual circumstances, the next procedure after the
   current one is simply the next word in concatenative sequence. Thus
@@ -81,8 +81,8 @@ The implementation rests on several observations:
   These cannot be simple addresses, as in classical FORTH. In standard
   C, a pointer is defined only for those addresses that lie between
   the beginning of an array and one past its end, inclusively. The
-  array in which +k+ sits as an instruction is different from the
-  array in which +a+, +b+, and +c+ sit, and so here there need to be
+  array in which _k_ sits as an instruction is different from the
+  array in which _a_, _b_, and _c_ sit, and so here there need to be
   two intruction pointer styles that differ in some non-trivial
   fashion. We could be fancy about it, but the simplest thing to do is
   to make sure the base address of every array pointed into is
