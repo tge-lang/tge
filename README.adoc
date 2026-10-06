@@ -36,10 +36,10 @@ The implementation rests on several observations:
   procedure.footnote:[It is, in fact, peculiar stack frames are
   treated as if they were the natural way to pass data, and any
   deviation from that an oddity. Stack frames are _clunky_. If
-  procedures are first-class objects, then procedures themselves can
-  be pushed to data stacks, and system stack frames are superfluous.
-  Even if merely _an instruction pointer_ be accessible and pushable
-  to a data stack, then system stack frames become superfluous.]
+  procedures be first-class objects, then procedures themselves can be
+  pushed to data stacks, and system stack frames are superfluous. Even
+  if merely _an instruction pointer_ be accessible and pushable to a
+  data stack, then system stack frames become superfluous.]
 
 * So also each procedure receives the information necessary to
   calculate what procedure will follow it. Thus the name
