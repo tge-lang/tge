@@ -20,34 +20,27 @@
   SOFTWARE.
 */
 
-#include <uchar.h>
-#include <string.h>
-#include <stdlib.h>
-#include <xalloc.h>
-#include <string_t.h>
+#ifndef TGE__UTF32_T_H__INCLUDED__
+#define TGE__UTF32_T_H__INCLUDED__
 
-struct string
-{
-  size_t n;
-  char32_t s[];
-};
+struct utf32;
+typedef const struct utf32 *utf32_t;
+struct utf8;
+typedef const struct utf8 *utf8_t;
 
-static size_t
-char32_literal_length (const char32_t *s)
-{
-  size_t i = 0;
-  while (s[i] != 0)
-    i += 1;
-  return i;
-}
+utf32_t make_utf32_n (const char32_t *, size_t);
+utf32_t make_utf32 (const char32_t *);
+utf8_t make_utf8_n (const char8_t *, size_t);
+utf8_t make_utf8 (const char8_t *);
 
-TGE_VISIBLE string_t
-make_string_t (const char32_t *s)
-{
-  size_t n = char32_literal_length (s);
-  struct string *str =
-    xmalloc (sizeof (struct string) + (n * sizeof (char32_t)));
-  str->n = n;
-  memcpy (str->s, s, n * sizeof (char32_t));
-  return str;
-}
+utf8_t utf32_to_utf8 (utf32_t);
+utf32_t utf8_to_utf32 (utf8_t);
+
+#endif /* TGE__UTF32_T_H__INCLUDED__ */
+
+/*
+  local variables:
+  mode: c
+  coding: utf-8
+  end:
+*/

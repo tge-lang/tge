@@ -1,0 +1,10 @@
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
+lib_LTLIBRARIES += libtge.la
+libtge_la_SOURCES =
+libtge_la_SOURCES += xalloc.h
+libtge_la_SOURCES += spookyhash.c spookyhash.h
+libtge_la_SOURCES += persistent_hash_map.h
+libtge_la_SOURCES += utf32_t.c utf32_t.h

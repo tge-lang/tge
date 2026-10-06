@@ -1,5 +1,6 @@
 ((nil (indent-tabs-mode . nil))
- (makefile-mode (indent-tabs-mode . t))
+ (makefile-mode (indent-tabs-mode . t)
+                (tab-width . 4))
  (c-mode (c-file-style . "gnu")
          (indent-tabs-mode . nil))
  (cc-mode (c-file-style . "gnu")

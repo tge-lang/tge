@@ -1,0 +1,58 @@
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
+EXTRA_DIST += $(srcdir)/package.m4
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac $(srcdir)/Makefile.am
+	$(AWK) \
+	  'BEGIN{printf "# Signature of the current package.\n"; \
+		 printf "m4_define([AT_PACKAGE_NAME],"; \
+		 printf "[$(PACKAGE_NAME)])\n"; \
+		 printf "m4_define([AT_PACKAGE_TARNAME],"; \
+		 printf "[$(PACKAGE_TARNAME)])\n"; \
+		 printf "m4_define([AT_PACKAGE_VERSION],"; \
+		 printf "[$(PACKAGE_VERSION)])\n"; \
+		 printf "m4_define([AT_PACKAGE_STRING],"; \
+		 printf "[$(PACKAGE_STRING)])\n"; \
+		 printf "m4_define([AT_PACKAGE_BUGREPORT],"; \
+		 printf "[$(PACKAGE_BUGREPORT)])\n"; \
+		 printf "m4_define([AT_PACKAGE_URL],"; \
+		 printf "[$(PACKAGE_URL)])\n"}' > $(@)
+
+AUTOM4TE = $(SHELL) $(srcdir)/build-aux/missing --run autom4te
+
+EXTRA_DIST += $(TESTSUITE_DEPS)
+TESTSUITE_DEPS =
+TESTSUITE_DEPS += $(srcdir)/atconfig.in
+TESTSUITE_DEPS += $(srcdir)/package.m4
+TESTSUITE_DEPS += $(srcdir)/testsuite.at
+
+DISTCLEANFILES += testsuite testsuite.log
+testsuite: $(TESTSUITE_DEPS)
+	$(AUTOM4TE) --language=autotest \
+		-I '$(srcdir)' -o $(@) $(srcdir)/$(@).at
+
+AM_DISTCHECK_CONFIGURE_FLAGS =
+
+ALL_THE_CHECK_FLAGS = $(color-flag) $(jobs-flag) $(TESTSUITEFLAGS)
+
+check-local:: atconfig testsuite
+	$(SHELL) testsuite $(ALL_THE_CHECK_FLAGS)
+
+#
+# installcheck is disabled.
+#
+installcheck-local:: atconfig testsuite
+	@if false; then \
+		$(SHELL) testsuite AUTOTEST_PATH='$(bindir)' \
+			$(ALL_THE_CHECK_FLAGS); \
+	fi
+
+#---------------------------------------------------------------------
+
+check_PROGRAMS += test_spookyhash
+test_spookyhash_SOURCES = test_spookyhash.c
+test_spookyhash_SOURCES += spookyhash-reference.h
+test_spookyhash_DEPENDENCIES = spookyhash.c spookyhash.h
+
+#---------------------------------------------------------------------

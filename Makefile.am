@@ -27,6 +27,7 @@ AUTOMAKE_OPTIONS += -Wno-portability
 
 @GNU@ include $(top_srcdir)/silent-rules.mk
 
+check_PROGRAMS =
 bin_PROGRAMS =
 lib_LTLIBRARIES =
 
@@ -51,29 +52,9 @@ DISTCLEANFILES += GNUmakefile
 
 #---------------------------------------------------------------------
 
-lib_LTLIBRARIES += libtge.la
-libtge_la_SOURCES =
-libtge_la_SOURCES += xalloc.h
-libtge_la_SOURCES += spookyhash.c spookyhash.h
-libtge_la_SOURCES += persistent_hash_map.h
-libtge_la_SOURCES += string_t.c string_t.h
-
-#---------------------------------------------------------------------
-
-.PHONY: indent
-indent:
-	$(INDENT) -l72 --no-tabs \
-		-Tint8_t \
-		-Tint16_t \
-		-Tint32_t \
-		-Tint64_t \
-		-Tuint8_t \
-		-Tuint16_t \
-		-Tuint32_t \
-		-Tuint64_t \
-		-Tchar32_t \
-		-TFILE \
-		$(srcdir)/*.{c,h}
+include libtge.am
+include indent.am
+include tests.am
 
 #---------------------------------------------------------------------
 
@@ -103,7 +84,3 @@ indent:
 # endif HAVE_MERCURIAL
 
 #---------------------------------------------------------------------
-# local variables:
-# coding: utf-8
-# tab-width: 4
-# end:

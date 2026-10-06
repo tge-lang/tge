@@ -34,6 +34,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -111,6 +123,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+check_PROGRAMS = test_spookyhash$(EXEEXT)
 bin_PROGRAMS =
 EXTRA_PROGRAMS =
 subdir = .
@@ -132,7 +145,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = atconfig
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)"
 PROGRAMS = $(bin_PROGRAMS)
@@ -164,12 +177,15 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtge_la_LIBADD =
-am_libtge_la_OBJECTS = spookyhash.lo string_t.lo
+am_libtge_la_OBJECTS = spookyhash.lo utf32_t.lo
 libtge_la_OBJECTS = $(am_libtge_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+am_test_spookyhash_OBJECTS = test_spookyhash.$(OBJEXT)
+test_spookyhash_OBJECTS = $(am_test_spookyhash_OBJECTS)
+test_spookyhash_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -186,7 +202,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/spookyhash.Plo \
-	./$(DEPDIR)/string_t.Plo
+	./$(DEPDIR)/test_spookyhash.Po ./$(DEPDIR)/utf32_t.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -206,8 +222,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libtge_la_SOURCES)
-DIST_SOURCES = $(libtge_la_SOURCES)
+SOURCES = $(libtge_la_SOURCES) $(test_spookyhash_SOURCES)
+DIST_SOURCES = $(libtge_la_SOURCES) $(test_spookyhash_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -231,7 +247,8 @@ am__define_uniq_tagged_files = \
     if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
 AM_RECURSIVE_TARGETS = cscope
-am__DIST_COMMON = $(srcdir)/Makefile.in \
+am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/atconfig.in \
+	$(srcdir)/indent.am $(srcdir)/libtge.am $(srcdir)/tests.am \
 	$(top_srcdir)/build-aux/compile \
 	$(top_srcdir)/build-aux/config.guess \
 	$(top_srcdir)/build-aux/config.sub \
@@ -394,22 +411,28 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4 --install
 AUTOMAKE_OPTIONS = -Wno-portability
-
-#---------------------------------------------------------------------
 lib_LTLIBRARIES = libtge.la
 CLEANFILES = 
 #EXTRA_DIST += INSTALL
 #EXTRA_DIST += AUTHORS
-DISTCLEANFILES = Makefile GNUmakefile
+DISTCLEANFILES = Makefile GNUmakefile testsuite testsuite.log
 #EXTRA_DIST += COPYING
-EXTRA_DIST = silent-rules.mk README.adoc
+EXTRA_DIST = silent-rules.mk README.adoc $(srcdir)/package.m4 \
+	$(TESTSUITE_DEPS)
 EXTRA_SCRIPTS = 
 BUILT_SOURCES = 
 AM_CPPFLAGS = 
 AM_CFLAGS = 
 AM_LIBRS = 
 libtge_la_SOURCES = xalloc.h spookyhash.c spookyhash.h \
-	persistent_hash_map.h string_t.c string_t.h
+	persistent_hash_map.h utf32_t.c utf32_t.h
+AUTOM4TE = $(SHELL) $(srcdir)/build-aux/missing --run autom4te
+TESTSUITE_DEPS = $(srcdir)/atconfig.in $(srcdir)/package.m4 \
+	$(srcdir)/testsuite.at
+AM_DISTCHECK_CONFIGURE_FLAGS = 
+ALL_THE_CHECK_FLAGS = $(color-flag) $(jobs-flag) $(TESTSUITEFLAGS)
+test_spookyhash_SOURCES = test_spookyhash.c spookyhash-reference.h
+test_spookyhash_DEPENDENCIES = spookyhash.c spookyhash.h
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -417,7 +440,7 @@ all: $(BUILT_SOURCES)
 .SUFFIXES: .c .lo .o .obj
 am--refresh: GNUmakefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/libtge.am $(srcdir)/indent.am $(srcdir)/tests.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -439,6 +462,7 @@ GNUmakefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles);; \
 	esac;
+$(srcdir)/libtge.am $(srcdir)/indent.am $(srcdir)/tests.am $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -448,6 +472,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
+atconfig: $(top_builddir)/config.status $(srcdir)/atconfig.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -493,6 +519,10 @@ clean-binPROGRAMS:
 	$(am__rm_f) $(bin_PROGRAMS)
 	test -z "$(EXEEXT)" || $(am__rm_f) $(bin_PROGRAMS:$(EXEEXT)=)
 
+clean-checkPROGRAMS:
+	$(am__rm_f) $(check_PROGRAMS)
+	test -z "$(EXEEXT)" || $(am__rm_f) $(check_PROGRAMS:$(EXEEXT)=)
+
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
@@ -529,6 +559,10 @@ clean-libLTLIBRARIES:
 libtge.la: $(libtge_la_OBJECTS) $(libtge_la_DEPENDENCIES) $(EXTRA_libtge_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(LINK) -rpath $(libdir) $(libtge_la_OBJECTS) $(libtge_la_LIBADD) $(LIBS)
 
+test_spookyhash$(EXEEXT): $(test_spookyhash_OBJECTS) $(test_spookyhash_DEPENDENCIES) $(EXTRA_test_spookyhash_DEPENDENCIES) 
+	@rm -f test_spookyhash$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_spookyhash_OBJECTS) $(test_spookyhash_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -536,7 +570,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spookyhash.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/string_t.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_spookyhash.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utf32_t.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
 	@$(MKDIR_P) $(@D)
@@ -811,12 +846,16 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: GNUmakefile $(PROGRAMS) $(LTLIBRARIES)
 install-EXTRAPROGRAMS: install-libLTLIBRARIES
 
 install-binPROGRAMS: install-libLTLIBRARIES
+
+install-checkPROGRAMS: install-libLTLIBRARIES
 
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)"; do \
@@ -859,13 +898,14 @@ maintainer-clean-generic:
 	-$(am__rm_f) $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-libLTLIBRARIES \
-	clean-libtool mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libLTLIBRARIES clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -f ./$(DEPDIR)/spookyhash.Plo
-	-rm -f ./$(DEPDIR)/string_t.Plo
+	-rm -f ./$(DEPDIR)/test_spookyhash.Po
+	-rm -f ./$(DEPDIR)/utf32_t.Plo
 	-rm -f GNUmakefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-libtool distclean-tags
@@ -908,13 +948,14 @@ install-ps: install-ps-am
 
 install-ps-am:
 
-installcheck-am:
+installcheck-am: installcheck-local
 
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
 	-rm -f ./$(DEPDIR)/spookyhash.Plo
-	-rm -f ./$(DEPDIR)/string_t.Plo
+	-rm -f ./$(DEPDIR)/test_spookyhash.Po
+	-rm -f ./$(DEPDIR)/utf32_t.Plo
 	-rm -f GNUmakefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -933,10 +974,12 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
-.MAKE: all check install install-am install-exec install-strip
+.MAKE: all check check-am install install-am install-exec \
+	install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--depfiles am--refresh check \
-	check-am clean clean-binPROGRAMS clean-cscope clean-generic \
+	check-am check-local clean clean-binPROGRAMS \
+	clean-checkPROGRAMS clean-cscope clean-generic \
 	clean-libLTLIBRARIES clean-libtool cscope cscopelist-am ctags \
 	ctags-am dist dist-all dist-bzip2 dist-bzip3 dist-gzip \
 	dist-lzip dist-shar dist-tarZ dist-xz dist-zip dist-zstd \
@@ -948,11 +991,11 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 	install-exec-am install-html install-html-am install-info \
 	install-info-am install-libLTLIBRARIES install-man install-pdf \
 	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-libLTLIBRARIES
+	installcheck installcheck-am installcheck-local installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 
 .PRECIOUS: GNUmakefile
 
@@ -960,8 +1003,6 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 .DELETE_ON_ERROR:
 
 @GNU@ include $(top_srcdir)/silent-rules.mk
-
-#---------------------------------------------------------------------
 
 .PHONY: indent
 indent:
@@ -975,8 +1016,44 @@ indent:
 		-Tuint32_t \
 		-Tuint64_t \
 		-Tchar32_t \
+		-Tutf8_t \
+		-Tutf32_t \
 		-TFILE \
 		$(srcdir)/*.{c,h}
+$(srcdir)/package.m4: $(top_srcdir)/configure.ac $(srcdir)/Makefile.am
+	$(AWK) \
+	  'BEGIN{printf "# Signature of the current package.\n"; \
+		 printf "m4_define([AT_PACKAGE_NAME],"; \
+		 printf "[$(PACKAGE_NAME)])\n"; \
+		 printf "m4_define([AT_PACKAGE_TARNAME],"; \
+		 printf "[$(PACKAGE_TARNAME)])\n"; \
+		 printf "m4_define([AT_PACKAGE_VERSION],"; \
+		 printf "[$(PACKAGE_VERSION)])\n"; \
+		 printf "m4_define([AT_PACKAGE_STRING],"; \
+		 printf "[$(PACKAGE_STRING)])\n"; \
+		 printf "m4_define([AT_PACKAGE_BUGREPORT],"; \
+		 printf "[$(PACKAGE_BUGREPORT)])\n"; \
+		 printf "m4_define([AT_PACKAGE_URL],"; \
+		 printf "[$(PACKAGE_URL)])\n"}' > $(@)
+testsuite: $(TESTSUITE_DEPS)
+	$(AUTOM4TE) --language=autotest \
+		-I '$(srcdir)' -o $(@) $(srcdir)/$(@).at
+
+check-local:: atconfig testsuite
+	$(SHELL) testsuite $(ALL_THE_CHECK_FLAGS)
+
+#
+# installcheck is disabled.
+#
+installcheck-local:: atconfig testsuite
+	@if false; then \
+		$(SHELL) testsuite AUTOTEST_PATH='$(bindir)' \
+			$(ALL_THE_CHECK_FLAGS); \
+	fi
+
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 
@@ -1006,10 +1083,6 @@ indent:
 # endif HAVE_MERCURIAL
 
 #---------------------------------------------------------------------
-# local variables:
-# coding: utf-8
-# tab-width: 4
-# end:
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
