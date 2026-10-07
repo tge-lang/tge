@@ -21,7 +21,7 @@
 AC_PREREQ([2.72])
 AC_INIT([tge],[0.0.0])
 
-AC_CONFIG_SRCDIR([README.adoc]) dnl FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME
+AC_CONFIG_SRCDIR([tge_gc.c])
 
 #AC_CONFIG_HEADERS([config.h])
 
@@ -57,6 +57,15 @@ AC_PROG_GREP
 AC_PROG_FGREP
 AC_PROG_EGREP
 
+AC_SUBST([INDENT_FLAGS])
+
+for i in 8 16 32 64; do
+    INDENT_FLAGS="${INDENT_FLAGS}${INDENT_FLAGS+ }-Tint${i}_t -Tuint${i}_t"
+done
+for i in 8 16 32; do
+    INDENT_FLAGS="${INDENT_FLAGS}${INDENT_FLAGS+ }-Tchar${i}_t"
+done
+
 CHEM_C23_FLAGS([c23_flags])
 CFLAGS="${CFLAGS}${CFLAGS+ }${c23_flags}"
 CHEM_GNU_C_FLAGS([hidden_flags],[-fPIC -fvisibility=hidden])
@@ -65,10 +74,7 @@ CFLAGS="${CFLAGS}${CFLAGS+ }${hidden_flags}"
 CHEM_GNU_C_FLAGS([visible_flags],[-fPIC -fvisibility=default])
 AC_SUBST([VISIBLE_CFLAGS],["${visible_flags}"])
 
-CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_VISIBLE='[[[gnu::visibility (\"default\")]]]'"
-CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_PURE='[[[gnu::pure]]]'"
-CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_CONST='[[[gnu::const]]]'"
-CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_NORETURN='[[[noreturn]]]'"
+m4_include([c_attributes.ac])
 
 CHEM_PATH_PROGS_CACHED_AND_PRECIOUS([INDENT],
   [GNU indent],[indent],

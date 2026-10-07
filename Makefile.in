@@ -137,7 +137,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/chem_prog_gnu_make.m4 \
 	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
 	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/c_attributes.ac \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -177,7 +178,7 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtge_la_LIBADD =
-am_libtge_la_OBJECTS = spookyhash.lo utf32_t.lo
+am_libtge_la_OBJECTS = tge_gc.lo spookyhash.lo utf32_t.lo
 libtge_la_OBJECTS = $(am_libtge_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -202,7 +203,8 @@ DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/spookyhash.Plo \
-	./$(DEPDIR)/test_spookyhash.Po ./$(DEPDIR)/utf32_t.Plo
+	./$(DEPDIR)/test_spookyhash.Po ./$(DEPDIR)/tge_gc.Plo \
+	./$(DEPDIR)/utf32_t.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -312,6 +314,7 @@ GNU = @GNU@
 GNU_MAKE = @GNU_MAKE@
 GREP = @GREP@
 INDENT = @INDENT@
+INDENT_FLAGS = @INDENT_FLAGS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -424,8 +427,8 @@ BUILT_SOURCES =
 AM_CPPFLAGS = 
 AM_CFLAGS = 
 AM_LIBRS = 
-libtge_la_SOURCES = xalloc.h spookyhash.c spookyhash.h \
-	persistent_hash_map.h utf32_t.c utf32_t.h
+libtge_la_SOURCES = xalloc.h tge_gc.c tge_gc.h spookyhash.c \
+	spookyhash.h persistent_hash_map.h utf32_t.c utf32_t.h
 AUTOM4TE = $(SHELL) $(srcdir)/build-aux/missing --run autom4te
 TESTSUITE_DEPS = $(srcdir)/atconfig.in $(srcdir)/package.m4 \
 	$(srcdir)/testsuite.at
@@ -571,6 +574,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spookyhash.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_spookyhash.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tge_gc.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utf32_t.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -905,6 +909,7 @@ distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -f ./$(DEPDIR)/spookyhash.Plo
 	-rm -f ./$(DEPDIR)/test_spookyhash.Po
+	-rm -f ./$(DEPDIR)/tge_gc.Plo
 	-rm -f ./$(DEPDIR)/utf32_t.Plo
 	-rm -f GNUmakefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -955,6 +960,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -rf $(top_srcdir)/autom4te.cache
 	-rm -f ./$(DEPDIR)/spookyhash.Plo
 	-rm -f ./$(DEPDIR)/test_spookyhash.Po
+	-rm -f ./$(DEPDIR)/tge_gc.Plo
 	-rm -f ./$(DEPDIR)/utf32_t.Plo
 	-rm -f GNUmakefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
@@ -1007,18 +1013,13 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 .PHONY: indent
 indent:
 	$(INDENT) -l72 --no-tabs \
-		-Tint8_t \
-		-Tint16_t \
-		-Tint32_t \
-		-Tint64_t \
-		-Tuint8_t \
-		-Tuint16_t \
-		-Tuint32_t \
-		-Tuint64_t \
-		-Tchar32_t \
 		-Tutf8_t \
 		-Tutf32_t \
 		-TFILE \
+		-Tthread_local \
+		-Tallocation_header_t \
+		-Tgarbage_collector_t \
+		$(INDENT_FLAGS) \
 		$(srcdir)/*.{c,h}
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac $(srcdir)/Makefile.am
 	$(AWK) \

@@ -1,0 +1,20 @@
+#---------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#---------------------------------------------------------------------
+
+AT_INIT
+AT_COPYRIGHT([Copyright © 2026 Barry Schwartz])
+
+#---------------------------------------------------------------------
+#AT_BANNER([data structures])
+
+AT_SETUP([spookyhash])
+AT_KEYWORDS([spookyhash hash hashtable hashmap container])
+AT_CHECK(["${abs_builddir}"/test_spookyhash],[0])
+AT_CLEANUP
+
+#---------------------------------------------------------------------
+# local variables:
+# mode: autoconf
+# coding: utf-8
+# end:

@@ -616,7 +616,7 @@ PACKAGE_STRING='tge 0.0.0'
 PACKAGE_BUGREPORT=''
 PACKAGE_URL=''
 
-ac_unique_file="README.adoc"
+ac_unique_file="tge_gc.c"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stddef.h>
@@ -659,6 +659,7 @@ GNU_MAKE
 GNU
 INDENT
 VISIBLE_CFLAGS
+INDENT_FLAGS
 enable_color
 LT_SYS_LIBRARY_PATH
 OTOOL64
@@ -2543,6 +2544,7 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 
 
@@ -15138,6 +15140,15 @@ printf "%s\n" "$ac_cv_path_EGREP" >&6; }
 
 
 
+
+for i in 8 16 32 64; do
+    INDENT_FLAGS="${INDENT_FLAGS}${INDENT_FLAGS+ }-Tint${i}_t -Tuint${i}_t"
+done
+for i in 8 16 32; do
+    INDENT_FLAGS="${INDENT_FLAGS}${INDENT_FLAGS+ }-Tchar${i}_t"
+done
+
+
  if true; then
   if true; then
   ac_ext=c
@@ -15551,10 +15562,53 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 VISIBLE_CFLAGS="${visible_flags}"
 
 
-CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_VISIBLE='[[gnu::visibility (\"default\")]]'"
-CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_PURE='[[gnu::pure]]'"
-CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_CONST='[[gnu::const]]'"
-CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_NORETURN='[[noreturn]]'"
+# Copyright © 2026 Barry Schwartz
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+if test "${GCC}" = "yes"; then
+   CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_VISIBLE='[[gnu::visibility (\"default\")]]'"
+else
+   CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_VISIBLE=''"
+fi
+INDENT_FLAGS="${INDENT_FLAGS}${INDENT_FLAGS+ }-TTGE_VISIBLE"
+for attribute in pure const; do
+    _attr=`echo ${attribute} | tr '[:lower:]' '[:upper:]'`
+    if test "${GCC}" = "yes"; then
+       _attr2="[[gnu::${attribute}]]"
+    else
+       _attr2=""
+    fi
+    CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_${_attr}='${_attr2}'"
+    INDENT_FLAGS="${INDENT_FLAGS}${INDENT_FLAGS+ }-TTGE_${_attr}"
+done
+for attribute in noreturn nodiscard unsequenced; do
+    _attr=`echo ${attribute} | tr '[:lower:]' '[:upper:]'`
+    if test "${attribute}" = "nodiscard" -a "${GCC}" = "yes"; then
+       _attr2="gnu::warn_unused_result"
+    else
+       _attr2="${attribute}"
+    fi
+    CFLAGS="${CFLAGS}${CFLAGS+ }-DTGE_${_attr}='[[${_attr2}]]'"
+    INDENT_FLAGS="${INDENT_FLAGS}${INDENT_FLAGS+ }-TTGE_${_attr}"
+done
+
 
 { :;
 
