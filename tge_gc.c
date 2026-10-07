@@ -202,16 +202,20 @@ tge_gc_alloc (size_t size) TGE_NODISCARD
 {
   size_t next_allocation_total;
   size_t total_size;
+
   void *user_ptr = nullptr;
 
-  if (ckd_add (&next_allocation_total, GC.total_allocated, size)
-      || next_allocation_total > GC.threshold)
+  bool overflow =
+    ckd_add (&next_allocation_total, GC.total_allocated, size);
+  if (overflow || next_allocation_total > GC.threshold)
     tge_gc_collect ();
 
-  if (!ckd_add (&next_allocation_total, GC.total_allocated, size))
+  overflow = ckd_add (&next_allocation_total, GC.total_allocated, size);
+  if (!overflow)
     {
-      if (!ckd_add
-          (&total_size, sizeof (struct allocation_header), size))
+      overflow =
+        ckd_add (&total_size, sizeof (struct allocation_header), size);
+      if (!overflow)
         {
           allocation_header_t block =
             (allocation_header_t) tge_xmalloc (total_size);
@@ -283,30 +287,30 @@ main (void)
 {
   thrd_t workers[4];
   uintptr_t index = 0;
+  int status;
 
   printf ("Main Launcher: Executing thread pool "
           "with dynamic stack-linked roots...\n");
 
   while (index < 4)
     {
-      if (thrd_create
-          (&workers[index], worker_thread_execution,
-           (void *) index) != thrd_success)
-        return 1;
+      status = thrd_create (&workers[index], worker_thread_execution,
+                            (void *) index);
+      if (status != thrd_success)
+        exit (1);
       index += 1;
     }
 
   index = 0;
   while (index < 4)
     {
-      int return_status;
-      thrd_join (workers[index], &return_status);
+      thrd_join (workers[index], &status);
       index += 1;
     }
 
   printf ("Main Launcher: Library operations completed "
           "successfully with zero buffer limits.\n");
-  return 0;
+  exit (0);
 }
 
 #endif /* TGE_GC_DEMO_PROGRAM */
