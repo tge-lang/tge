@@ -6,11 +6,15 @@ AT_INIT
 AT_COPYRIGHT([Copyright © 2026 Barry Schwartz])
 
 #---------------------------------------------------------------------
-#AT_BANNER([data structures])
 
 AT_SETUP([spookyhash])
 AT_KEYWORDS([spookyhash hash hashtable hashmap container])
 AT_CHECK(["${abs_builddir}"/test_spookyhash],[0])
+AT_CLEANUP
+
+AT_SETUP([tge_gc])
+AT_KEYWORDS([tge_gc gc garbage collector])
+AT_CHECK(["${abs_builddir}"/test_tge_gc],[0],[ignore])
 AT_CLEANUP
 
 #---------------------------------------------------------------------

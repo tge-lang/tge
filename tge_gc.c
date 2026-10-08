@@ -1,24 +1,22 @@
-/*
-  Copyright © 2026 Barry Schwartz
-  
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-  
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-  
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-  SOFTWARE.
-*/
+// Copyright © 2026 Barry Schwartz
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 #include <tge_gc.h>
 #include <stdint.h>
@@ -74,7 +72,7 @@ static thread_local GarbageCollector GC = {
   .roots_head = nullptr
 };
 
-void
+TGE_VISIBLE void
 tge_gc_init (void)
 {
   GC.head = nullptr;
@@ -82,7 +80,7 @@ tge_gc_init (void)
   GC.roots_head = nullptr;
 }
 
-void
+TGE_VISIBLE void
 tge_gc_link_root (tge_gc_root_node_t node, void **root_ptr)
 {
   if (node != nullptr)
@@ -93,7 +91,7 @@ tge_gc_link_root (tge_gc_root_node_t node, void **root_ptr)
     }
 }
 
-void
+TGE_VISIBLE void
 tge_gc_unlink_root (tge_gc_root_node_t node)
 {
   tge_gc_root_node_t curr = GC.roots_head;
@@ -138,9 +136,27 @@ tge_gc_mark_block (uintptr_t ptr_val)
     {
       uintptr_t block_start =
         (uintptr_t) ((char *) curr + sizeof (struct allocation_header));
-      curr->marked =
-        curr->marked || tge_gc_is_addr_in_block (ptr_val, block_start,
-                                                 curr->size);
+      uintptr_t block_end = block_start + curr->size;
+
+      /* If the value points inside an unmarked block, mark it and scan its contents */
+      if (!curr->marked
+          && (ptr_val >= block_start) * (ptr_val < block_end))
+        {
+          curr->marked = true;
+
+          /* Align the payload scan boundaries to word sizes safely */
+          size_t aligned_size =
+            curr->size & ~(sizeof (uintptr_t) - TGE_UWB (1));
+          uintptr_t *payload_ptr = (uintptr_t *) block_start;
+          uintptr_t *payload_limit =
+            (uintptr_t *) ((char *) block_start + aligned_size);
+
+          while (payload_ptr < payload_limit)
+            {
+              tge_gc_mark_block (*payload_ptr);
+              payload_ptr += 1;
+            }
+        }
       curr = curr->next;
     }
 }
@@ -173,7 +189,7 @@ tge_gc_sweep (void)
     }
 }
 
-void
+TGE_VISIBLE void
 tge_gc_collect (void)
 {
   tge_gc_root_node_t curr_root = GC.roots_head;
@@ -195,7 +211,7 @@ tge_gc_collect (void)
 }
 
 /**INDENT-OFF**/
-void *
+TGE_VISIBLE void *
 tge_gc_alloc (size_t size) TGE_NODISCARD
 /**INDENT-ON**/
 

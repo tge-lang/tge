@@ -56,3 +56,9 @@ test_spookyhash_SOURCES += spookyhash-reference.h
 test_spookyhash_DEPENDENCIES = spookyhash.c spookyhash.h
 
 #---------------------------------------------------------------------
+
+check_PROGRAMS += test_tge_gc
+test_tge_gc_SOURCES = test_tge_gc.c
+test_tge_gc_DEPENDENCIES = tge_gc.c tge_gc.h
+
+#---------------------------------------------------------------------
