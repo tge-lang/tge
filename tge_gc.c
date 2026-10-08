@@ -97,18 +97,14 @@ tge_gc_unlink_root (tge_gc_root_node_t node)
   tge_gc_root_node_t curr = GC.roots_head;
   tge_gc_root_node_t prev = nullptr;
   bool found = false;
-
   while (curr != nullptr)
     {
       if (curr == node)
         found = true;
-
       if (!found)
         prev = curr;
-
       curr = curr->next;
     }
-
   if (found)
     {
       if (prev == nullptr)
@@ -116,16 +112,6 @@ tge_gc_unlink_root (tge_gc_root_node_t node)
       else
         prev->next = node->next;
     }
-}
-
-/**INDENT-OFF**/
-static bool
-tge_gc_is_addr_in_block (uintptr_t ptr_val, uintptr_t start, size_t size)
-TGE_UNSEQUENCED
-/**INDENT-ON**/
-
-{
-  return (bool) ((ptr_val >= start) * (ptr_val < (start + size)));
 }
 
 static void
@@ -138,13 +124,15 @@ tge_gc_mark_block (uintptr_t ptr_val)
         (uintptr_t) ((char *) curr + sizeof (struct allocation_header));
       uintptr_t block_end = block_start + curr->size;
 
-      /* If the value points inside an unmarked block, mark it and scan its contents */
+      /* If the value points inside an unmarked block, mark it and
+         scan its contents. */
       if (!curr->marked
-          && (ptr_val >= block_start) * (ptr_val < block_end))
+          && ((block_start <= ptr_val) * (ptr_val < block_end)))
         {
           curr->marked = true;
 
-          /* Align the payload scan boundaries to word sizes safely */
+          /* Align the payload scan boundaries to word sizes
+             safely. */
           size_t aligned_size =
             curr->size & ~(sizeof (uintptr_t) - TGE_UWB (1));
           uintptr_t *payload_ptr = (uintptr_t *) block_start;
@@ -210,11 +198,8 @@ tge_gc_collect (void)
   tge_gc_sweep ();
 }
 
-/**INDENT-OFF**/
 TGE_VISIBLE void *
-tge_gc_alloc (size_t size) TGE_NODISCARD
-/**INDENT-ON**/
-
+tge_gc_alloc (size_t size)
 {
   size_t next_allocation_total;
   size_t total_size;
