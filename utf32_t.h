@@ -22,6 +22,9 @@
 #define TGE__UTF32_T_H__INCLUDED__
 
 #include <uchar.h>
+#include <stdint.h>
+
+//----------------------------------------------------------------------
 
 struct utf32;
 struct utf8;
@@ -39,24 +42,46 @@ utf8_t make_utf8 (const char8_t *);
 utf8_t utf32_to_utf8 (utf32_t);
 utf32_t utf8_to_utf32 (utf8_t);
 
-// The following return null-terminated memory that must be rooted for
+//----------------------------------------------------------------------
+//
+// The following return null-terminated strings that must be rooted for
 // the garbage collector.
+//
+
 char8_t *utf32_to_c8str (utf32_t);
 char8_t *utf8_to_c8str (utf8_t);
 
+//----------------------------------------------------------------------
+//
 // The following comparatives are useful for ordered data structures
 // and for equality tests, but are useless for putting words in
 // alphabetic order, etc. They count the shorter of two strings as
 // less than the other, and use memcmp(3) to compare strings of equal
 // length. They do not perform normalizations.
+//
+
 int utf32_cmp (utf32_t, utf32_t);
 int utf8_cmp (utf8_t, utf8_t);
 
+//----------------------------------------------------------------------
+//
+// String hashing.
+//
+
+struct utf32_t_hash_context;
+typedef struct utf32_t_hash_context *utf32_t_hash_context_t;
+
+// The hash context object must be rooted for the garbage collector.
+utf32_t_hash_context_t utf32_t_hash_init (utf32_t str);
+
+uint64_t utf32_t_hash (utf32_t_hash_context_t context,
+                       unsigned int i);
+
+//----------------------------------------------------------------------
+
 #endif /* TGE__UTF32_T_H__INCLUDED__ */
 
-/*
-  local variables:
-  mode: c
-  coding: utf-8
-  end:
-*/
+// local variables:
+// mode: c
+// coding: utf-8
+// end:

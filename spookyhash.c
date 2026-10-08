@@ -1,24 +1,22 @@
-/*
-  Copyright © 2026 Barry Schwartz
-  
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-  
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-  
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-  SOFTWARE.
-*/
+// Copyright © 2026 Barry Schwartz
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 /*--------------------------------------------------------------------*/
 /* SpookyHash version 2. first translated from Barry Schwartz’s       */
@@ -35,7 +33,7 @@
 #include <byteswap.h>
 #include <spookyhash.h>
 
-/*--------------------------------------------------------------------*/
+//----------------------------------------------------------------------
 
 #ifndef SPOOKYHASH_NDEBUG
 #define SPOOKYHASH_NDEBUG 1
@@ -72,14 +70,14 @@
 #define SPOOKYHASH_INLINE [[gnu::always_inline]] static inline
 #endif
 
-/*--------------------------------------------------------------------*/
+//----------------------------------------------------------------------
 
 _Static_assert (sizeof (uint8_t) == 1, "uint8_t is not 1 byte");
 _Static_assert (sizeof (uint16_t) == 2, "uint16_t is not 2 bytes");
 _Static_assert (sizeof (uint32_t) == 4, "uint32_t is not 4 bytes");
 _Static_assert (sizeof (uint64_t) == 8, "uint64_t is not 8 bytes");
 
-/*--------------------------------------------------------------------*/
+//----------------------------------------------------------------------
 
 #define SPOOKYHASH_NUMVARS 12
 #define SPOOKYHASH_TWICE_NUMVARS (2 * SPOOKYHASH_NUMVARS)
@@ -174,7 +172,7 @@ ref64 (const void *p, unsigned int i)
   return ((const uint64_t *) p)[i];
 }
 
-/*--------------------------------------------------------------------*/
+//----------------------------------------------------------------------
 
 SPOOKYHASH_INLINE void
 spookyhash_mix (uint64_t h[SPOOKYHASH_NUMVARS],
@@ -397,7 +395,7 @@ spookyhash_final_end (uint64_t h[SPOOKYHASH_NUMVARS],
   spookyhash_end_partial (h);
 }
 
-/*--------------------------------------------------------------------*/
+//----------------------------------------------------------------------
 
 SPOOKYHASH_INLINE void
 spookyhash_short_mix (uint64_t abcd[4])
@@ -682,7 +680,7 @@ spookyhash_short (const void *message, size_t length,
     }
 }
 
-/*--------------------------------------------------------------------*/
+//----------------------------------------------------------------------
 
 SPOOKYHASH_VISIBLE void
 spookyhash_init (spookyhash_context_t *context,
@@ -854,10 +852,8 @@ spookyhash_final_bytes (spookyhash_context_t *context,
   spookyhash_bytes (hash1, hash2, hash_bytes);
 }
 
-/*--------------------------------------------------------------------*/
-/*
-  local variables:
-  mode: c
-  coding: utf-8
-  end:
-*/
+//----------------------------------------------------------------------
+// local variables:
+// mode: c
+// coding: utf-8
+// end:

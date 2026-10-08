@@ -1,0 +1,14 @@
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
+CHEM_PATH_PROGS_CACHED_AND_PRECIOUS([INDENT],
+  [GNU indent],[indent],
+  [
+    if LC_ALL=C LANG=C ${ac_path_INDENT} --version 2>&1 | \
+      LC_ALL=C LANG=C ${GREP} -e '^GNU indent' \
+               2> /dev/null > /dev/null; then
+      ac_cv_path_INDENT="${ac_path_INDENT}"
+      ac_path_INDENT_found=:
+    fi
+  ])

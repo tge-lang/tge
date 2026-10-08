@@ -57,6 +57,8 @@ AC_PROG_GREP
 AC_PROG_FGREP
 AC_PROG_EGREP
 
+AC_CHECK_FUNCS([getentropy])
+
 AC_SUBST([INDENT_FLAGS])
 
 for i in 8 16 32 64; do
@@ -75,17 +77,7 @@ CHEM_GNU_C_FLAGS([visible_flags],[-fPIC -fvisibility=default])
 AC_SUBST([VISIBLE_CFLAGS],["${visible_flags}"])
 
 m4_include([c_attributes.ac])
-
-CHEM_PATH_PROGS_CACHED_AND_PRECIOUS([INDENT],
-  [GNU indent],[indent],
-  [
-    if LC_ALL=C LANG=C ${ac_path_INDENT} --version 2>&1 | \
-      LC_ALL=C LANG=C ${GREP} -e '^GNU indent' \
-               2> /dev/null > /dev/null; then
-      ac_cv_path_INDENT="${ac_path_INDENT}"
-      ac_path_INDENT_found=:
-    fi
-  ])
+m4_include([indent.ac])
 
 # CHEM_PATH_PROGS_CACHED_AND_PRECIOUS([MERCURIAL],
 #   [Mercurial Distributed SCM],[hg],

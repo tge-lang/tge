@@ -12,4 +12,4 @@ indent:
 		-Tallocation_header_t \
 		-Tgarbage_collector_t \
 		$(INDENT_FLAGS) \
-		$(srcdir)/*.{c,h}
+		$(addprefix $(srcdir)/,$(libtge_la_SOURCES))
