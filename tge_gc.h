@@ -47,7 +47,7 @@ void tge_gc_unlink_root (tge_gc_root_node_t node);
 
 /* The program will abort if the underlying malloc(3) runs out of
    memory. */
-void *tge_gc_alloc (size_t size) TGE_NODISCARD;
+void *tge_gc_malloc (size_t size) TGE_NODISCARD;
 
 /**INDENT-ONk**/
 

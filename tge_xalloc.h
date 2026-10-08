@@ -18,22 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef TGE__XALLOC_H__INCLUDED__
-#define TGE__XALLOC_H__INCLUDED__
+#ifndef TGE__TGE_XALLOC_H__INCLUDED__
+#define TGE__TGE_XALLOC_H__INCLUDED__
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-static void
-tge_xalloc_memory_exhausted (void)
-{
-  fprintf (stderr, "virtual memory exhausted\n");
-  abort ();
-}
+void tge_xalloc_memory_exhausted (void);
 
-static inline void *
-xmalloc (size_t n)
+inline void *
+tge_xmalloc (size_t n)
 {
   void *p = malloc (n);
   if (p == nullptr)
@@ -41,9 +36,7 @@ xmalloc (size_t n)
   return p;
 }
 
-#define XMALLOC(T) (xmalloc (sizeof (T)))
-
-#endif /* TGE__XALLOC_H__INCLUDED__ */
+#endif /* TGE__TGE_XALLOC_H__INCLUDED__ */
 
 /*
   local variables:

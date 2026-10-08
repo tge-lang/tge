@@ -21,9 +21,14 @@
 #ifndef TGE__UTF32_T_H__INCLUDED__
 #define TGE__UTF32_T_H__INCLUDED__
 
+#include <uchar.h>
+
 struct utf32;
-typedef const struct utf32 *utf32_t;
 struct utf8;
+
+// utf32_t and utf8_t objects must be rooted if they are to be kept by
+// the garbage collector.
+typedef const struct utf32 *utf32_t;
 typedef const struct utf8 *utf8_t;
 
 utf32_t make_utf32_n (const char32_t *, size_t);
@@ -33,6 +38,19 @@ utf8_t make_utf8 (const char8_t *);
 
 utf8_t utf32_to_utf8 (utf32_t);
 utf32_t utf8_to_utf32 (utf8_t);
+
+// The following return null-terminated memory that must be rooted for
+// the garbage collector.
+char8_t *utf32_to_c8str (utf32_t);
+char8_t *utf8_to_c8str (utf8_t);
+
+// The following comparatives are useful for ordered data structures
+// and for equality tests, but are useless for putting words in
+// alphabetic order, etc. They count the shorter of two strings as
+// less than the other, and use memcmp(3) to compare strings of equal
+// length. They do not perform normalizations.
+int utf32_cmp (utf32_t, utf32_t);
+int utf8_cmp (utf8_t, utf8_t);
 
 #endif /* TGE__UTF32_T_H__INCLUDED__ */
 

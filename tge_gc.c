@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 #include <tge_gc.h>
+#include <tge_xalloc.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -26,24 +27,6 @@
 #include <stdckdint.h>
 
 #define TGE_UWB(N) N##uwb
-
-//----------------------------------------------------------------------
-
-static void
-tge_xalloc_memory_exhausted (void)
-{
-  fprintf (stderr, "virtual memory exhausted\n");
-  abort ();
-}
-
-static inline void *
-tge_xmalloc (size_t n)
-{
-  void *p = malloc (n);
-  if (p == nullptr)
-    tge_xalloc_memory_exhausted ();
-  return p;
-}
 
 //----------------------------------------------------------------------
 
@@ -199,7 +182,7 @@ tge_gc_collect (void)
 }
 
 TGE_VISIBLE void *
-tge_gc_alloc (size_t size)
+tge_gc_malloc (size_t size)
 {
   size_t next_allocation_total;
   size_t total_size;
@@ -256,12 +239,12 @@ worker_thread_execution (void *arg)
   tge_gc_init ();
   uintptr_t id = (uintptr_t) arg;
 
-  current_node = (Node *) tge_gc_alloc (sizeof (Node));
+  current_node = (Node *) tge_gc_malloc (sizeof (Node));
   if (current_node != nullptr)
     {
       current_node->data = (int) (id * TGE_UWB (100));
 
-      temporary_node = (Node *) tge_gc_alloc (sizeof (Node));
+      temporary_node = (Node *) tge_gc_malloc (sizeof (Node));
       if (temporary_node != nullptr)
         {
           temporary_node->data = current_node->data + 50;

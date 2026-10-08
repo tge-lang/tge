@@ -60,5 +60,12 @@ test_spookyhash_DEPENDENCIES = spookyhash.c spookyhash.h
 check_PROGRAMS += test_tge_gc
 test_tge_gc_SOURCES = test_tge_gc.c
 test_tge_gc_DEPENDENCIES = tge_gc.c tge_gc.h
+test_tge_gc_DEPENDENCIES += tge_xalloc.c tge_xalloc.h
+
+#---------------------------------------------------------------------
+
+check_PROGRAMS += test_utf32_t
+test_utf32_t_SOURCES = test_utf32_t.c
+test_utf32_t_LDADD = libtge.la
 
 #---------------------------------------------------------------------

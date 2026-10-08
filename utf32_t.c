@@ -21,12 +21,12 @@
 */
 
 #include <assert.h>
-#include <uchar.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <limits.h>
-#include <xalloc.h>
+#include <tge_xalloc.h>
+#include <tge_gc.h>
 #include <utf32_t.h>
 
 #if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 202311L
@@ -151,7 +151,7 @@ TGE_VISIBLE utf32_t
 make_utf32_n (const char32_t *s, size_t n)
 {
   struct utf32 *u32 =
-    xmalloc (sizeof (struct utf32) + (n * sizeof (char32_t)));
+    tge_gc_malloc (sizeof (struct utf32) + (n * sizeof (char32_t)));
   u32->n = n;
   memcpy (u32->s, s, n * sizeof (char32_t));
   return u32;
@@ -167,7 +167,7 @@ TGE_VISIBLE utf8_t
 make_utf8_n (const char8_t *s, size_t n)
 {
   struct utf8 *u8 =
-    xmalloc (sizeof (struct utf8) + (n * sizeof (char8_t)));
+    tge_gc_malloc (sizeof (struct utf8) + (n * sizeof (char8_t)));
   u8->n = n;
   memcpy (u8->s, s, n * sizeof (char8_t));
   return u8;
@@ -185,7 +185,7 @@ TGE_VISIBLE utf8_t
 utf32_to_utf8 (utf32_t u32)
 {
   size_t n_buf = u32->n * MB_LEN_MAX;
-  char8_t *buf = xmalloc (n_buf * sizeof (char8_t));
+  char8_t *buf = tge_xmalloc (n_buf * sizeof (char8_t));
   size_t num_written;
   convert_utf32_to_utf8_string (buf, n_buf, u32->s, u32->n,
                                 &num_written);
@@ -198,12 +198,61 @@ TGE_VISIBLE utf32_t
 utf8_to_utf32 (utf8_t u8)
 {
   size_t n_buf = u8->n;
-  char32_t *buf = xmalloc (n_buf * sizeof (char32_t));
+  char32_t *buf = tge_xmalloc (n_buf * sizeof (char32_t));
   size_t num_written;
   convert_utf8_to_utf32_string (buf, n_buf, u8->s, u8->n, &num_written);
   utf32_t u32 = make_utf32_n (buf, num_written);
   free (buf);
   return u32;
+}
+
+//----------------------------------------------------------------------
+
+TGE_VISIBLE char8_t *
+utf32_to_c8str (utf32_t u32)
+{
+  TGE_GC_LOCAL_ROOT (utf8_t, u8);
+  u8 = utf32_to_utf8 (u32);
+  char8_t *s = utf8_to_c8str (u8);
+  TGE_GC_UNREGISTER_ROOT (u8);
+  return s;
+}
+
+TGE_VISIBLE char8_t *
+utf8_to_c8str (utf8_t u8)
+{
+  char8_t *s = tge_gc_malloc ((u8->n + 1) * sizeof (char8_t));
+  memcpy (s, u8->s, u8->n);
+  s[u8->n] = 0;
+  return s;
+}
+
+//----------------------------------------------------------------------
+
+TGE_VISIBLE int
+utf32_cmp (utf32_t left, utf32_t right)
+{
+  int cmp;
+  if (left->n < right->n)
+    cmp = -1;
+  else if (right->n < left->n)
+    cmp = 1;
+  else
+    cmp = memcmp (left->s, right->s, left->n * sizeof (char32_t));
+  return cmp;
+}
+
+TGE_VISIBLE int
+utf8_cmp (utf8_t left, utf8_t right)
+{
+  int cmp;
+  if (left->n < right->n)
+    cmp = -1;
+  else if (right->n < left->n)
+    cmp = 1;
+  else
+    cmp = memcmp (left->s, right->s, left->n * sizeof (char8_t));
+  return cmp;
 }
 
 //----------------------------------------------------------------------

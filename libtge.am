@@ -4,7 +4,7 @@
 
 lib_LTLIBRARIES += libtge.la
 libtge_la_SOURCES =
-libtge_la_SOURCES += xalloc.h
+libtge_la_SOURCES += tge_xalloc.c tge_xalloc.h
 libtge_la_SOURCES += tge_gc.c tge_gc.h
 libtge_la_SOURCES += spookyhash.c spookyhash.h
 libtge_la_SOURCES += persistent_hash_map.h

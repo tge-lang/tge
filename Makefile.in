@@ -123,7 +123,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = test_spookyhash$(EXEEXT) test_tge_gc$(EXEEXT)
+check_PROGRAMS = test_spookyhash$(EXEEXT) test_tge_gc$(EXEEXT) \
+	test_utf32_t$(EXEEXT)
 bin_PROGRAMS =
 EXTRA_PROGRAMS =
 subdir = .
@@ -178,7 +179,8 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtge_la_LIBADD =
-am_libtge_la_OBJECTS = tge_gc.lo spookyhash.lo utf32_t.lo
+am_libtge_la_OBJECTS = tge_xalloc.lo tge_gc.lo spookyhash.lo \
+	utf32_t.lo
 libtge_la_OBJECTS = $(am_libtge_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -190,6 +192,9 @@ test_spookyhash_LDADD = $(LDADD)
 am_test_tge_gc_OBJECTS = test_tge_gc.$(OBJEXT)
 test_tge_gc_OBJECTS = $(am_test_tge_gc_OBJECTS)
 test_tge_gc_LDADD = $(LDADD)
+am_test_utf32_t_OBJECTS = test_utf32_t.$(OBJEXT)
+test_utf32_t_OBJECTS = $(am_test_utf32_t_OBJECTS)
+test_utf32_t_DEPENDENCIES = libtge.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -207,7 +212,8 @@ depcomp = $(SHELL) $(top_srcdir)/build-aux/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/spookyhash.Plo \
 	./$(DEPDIR)/test_spookyhash.Po ./$(DEPDIR)/test_tge_gc.Po \
-	./$(DEPDIR)/tge_gc.Plo ./$(DEPDIR)/utf32_t.Plo
+	./$(DEPDIR)/test_utf32_t.Po ./$(DEPDIR)/tge_gc.Plo \
+	./$(DEPDIR)/tge_xalloc.Plo ./$(DEPDIR)/utf32_t.Plo
 am__mv = mv -f
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -228,9 +234,9 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libtge_la_SOURCES) $(test_spookyhash_SOURCES) \
-	$(test_tge_gc_SOURCES)
+	$(test_tge_gc_SOURCES) $(test_utf32_t_SOURCES)
 DIST_SOURCES = $(libtge_la_SOURCES) $(test_spookyhash_SOURCES) \
-	$(test_tge_gc_SOURCES)
+	$(test_tge_gc_SOURCES) $(test_utf32_t_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -432,8 +438,9 @@ BUILT_SOURCES =
 AM_CPPFLAGS = 
 AM_CFLAGS = 
 AM_LIBRS = 
-libtge_la_SOURCES = xalloc.h tge_gc.c tge_gc.h spookyhash.c \
-	spookyhash.h persistent_hash_map.h utf32_t.c utf32_t.h
+libtge_la_SOURCES = tge_xalloc.c tge_xalloc.h tge_gc.c tge_gc.h \
+	spookyhash.c spookyhash.h persistent_hash_map.h utf32_t.c \
+	utf32_t.h
 AUTOM4TE = $(SHELL) $(srcdir)/build-aux/missing --run autom4te
 TESTSUITE_DEPS = $(srcdir)/atconfig.in $(srcdir)/package.m4 \
 	$(srcdir)/testsuite.at
@@ -442,7 +449,9 @@ ALL_THE_CHECK_FLAGS = $(color-flag) $(jobs-flag) $(TESTSUITEFLAGS)
 test_spookyhash_SOURCES = test_spookyhash.c spookyhash-reference.h
 test_spookyhash_DEPENDENCIES = spookyhash.c spookyhash.h
 test_tge_gc_SOURCES = test_tge_gc.c
-test_tge_gc_DEPENDENCIES = tge_gc.c tge_gc.h
+test_tge_gc_DEPENDENCIES = tge_gc.c tge_gc.h tge_xalloc.c tge_xalloc.h
+test_utf32_t_SOURCES = test_utf32_t.c
+test_utf32_t_LDADD = libtge.la
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -577,6 +586,10 @@ test_tge_gc$(EXEEXT): $(test_tge_gc_OBJECTS) $(test_tge_gc_DEPENDENCIES) $(EXTRA
 	@rm -f test_tge_gc$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(test_tge_gc_OBJECTS) $(test_tge_gc_LDADD) $(LIBS)
 
+test_utf32_t$(EXEEXT): $(test_utf32_t_OBJECTS) $(test_utf32_t_DEPENDENCIES) $(EXTRA_test_utf32_t_DEPENDENCIES) 
+	@rm -f test_utf32_t$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(test_utf32_t_OBJECTS) $(test_utf32_t_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -586,7 +599,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spookyhash.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_spookyhash.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_tge_gc.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_utf32_t.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tge_gc.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tge_xalloc.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utf32_t.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -922,7 +937,9 @@ distclean: distclean-am
 	-rm -f ./$(DEPDIR)/spookyhash.Plo
 	-rm -f ./$(DEPDIR)/test_spookyhash.Po
 	-rm -f ./$(DEPDIR)/test_tge_gc.Po
+	-rm -f ./$(DEPDIR)/test_utf32_t.Po
 	-rm -f ./$(DEPDIR)/tge_gc.Plo
+	-rm -f ./$(DEPDIR)/tge_xalloc.Plo
 	-rm -f ./$(DEPDIR)/utf32_t.Plo
 	-rm -f GNUmakefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -974,7 +991,9 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./$(DEPDIR)/spookyhash.Plo
 	-rm -f ./$(DEPDIR)/test_spookyhash.Po
 	-rm -f ./$(DEPDIR)/test_tge_gc.Po
+	-rm -f ./$(DEPDIR)/test_utf32_t.Po
 	-rm -f ./$(DEPDIR)/tge_gc.Plo
+	-rm -f ./$(DEPDIR)/tge_xalloc.Plo
 	-rm -f ./$(DEPDIR)/utf32_t.Plo
 	-rm -f GNUmakefile
 maintainer-clean-am: distclean-am maintainer-clean-generic

@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include "tge_xalloc.c"
 #include "tge_gc.c"
 #include <stdio.h>
-#include <stdbool.h>
 
 static size_t
 tge_gc_test_get_registered_root_count (void)
@@ -74,9 +74,10 @@ run_garbage_collector_regression_suite (void)
     TEST_ASSERT (tge_gc_test_get_registered_root_count () == 2,
                  "Dynamic chain length step mismatched.");
 
-    first_root = (test_node_t) tge_gc_alloc (sizeof (struct test_node));
+    first_root =
+      (test_node_t) tge_gc_malloc (sizeof (struct test_node));
     second_root =
-      (test_node_t) tge_gc_alloc (sizeof (struct test_node));
+      (test_node_t) tge_gc_malloc (sizeof (struct test_node));
 
     TEST_ASSERT (tge_gc_test_get_total_allocated_bytes () ==
                  (sizeof (struct test_node) * 2),
@@ -104,13 +105,13 @@ run_garbage_collector_regression_suite (void)
     ("[4] Evaluating complex multi-tier deep reference graphs...\n");
   {
     TGE_GC_LOCAL_ROOT (test_node_t, head_root);
-    head_root = (test_node_t) tge_gc_alloc (sizeof (struct test_node));
+    head_root = (test_node_t) tge_gc_malloc (sizeof (struct test_node));
 
     if (head_root != nullptr)
       {
         head_root->payload = 777;
         head_root->next =
-          (test_node_t) tge_gc_alloc (sizeof (struct test_node));
+          (test_node_t) tge_gc_malloc (sizeof (struct test_node));
         if (head_root->next != nullptr)
           head_root->next->payload = 888;
       }
@@ -136,8 +137,8 @@ run_garbage_collector_regression_suite (void)
     TGE_GC_LOCAL_ROOT (test_node_t, node_a);
     TGE_GC_LOCAL_ROOT (test_node_t, node_b);
 
-    node_a = (test_node_t) tge_gc_alloc (sizeof (struct test_node));
-    node_b = (test_node_t) tge_gc_alloc (sizeof (struct test_node));
+    node_a = (test_node_t) tge_gc_malloc (sizeof (struct test_node));
+    node_b = (test_node_t) tge_gc_malloc (sizeof (struct test_node));
 
     if ((node_a != nullptr) * (node_b != nullptr))
       {

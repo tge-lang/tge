@@ -17,6 +17,11 @@ AT_KEYWORDS([tge_gc gc garbage collector])
 AT_CHECK(["${abs_builddir}"/test_tge_gc],[0],[ignore])
 AT_CLEANUP
 
+AT_SETUP([utf32_t])
+AT_KEYWORDS([utf32_t utf32 utf8 utf-32 utf-8 strings string unicode])
+AT_CHECK(["${abs_builddir}"/test_utf32_t],[0])
+AT_CLEANUP
+
 #---------------------------------------------------------------------
 # local variables:
 # mode: autoconf
