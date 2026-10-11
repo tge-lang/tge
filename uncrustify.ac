@@ -1,0 +1,14 @@
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
+CHEM_PATH_PROGS_CACHED_AND_PRECIOUS([UNCRUSTIFY],
+  [GNU uncrustify],[uncrustify],
+  [
+    if LC_ALL=C LANG=C ${ac_path_UNCRUSTIFY} --version 2>&1 | \
+      LC_ALL=C LANG=C ${GREP} -e '^Uncrustify' \
+               2> /dev/null > /dev/null; then
+      ac_cv_path_UNCRUSTIFY="${ac_path_UNCRUSTIFY}"
+      ac_path_UNCRUSTIFY_found=:
+    fi
+  ])
