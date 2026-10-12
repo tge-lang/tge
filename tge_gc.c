@@ -42,7 +42,9 @@ struct gc_cell
   const size_t resource_count;
   void (PCTR finalizer) (void CPPTR handles_array, size_t count);
 
-  void PTR handles[];
+  // Make the handles array bytes, so it can be abused for general
+  // storage.
+  alignas (void PTR) unsigned char handles[];
 };
 
 typedef struct
@@ -80,7 +82,8 @@ vector_push (object_vector PTR target_vector,
   if (target_vector->size >= target_vector->capacity)
     {
       target_vector->capacity =
-        target_vector->capacity == 0 ? 4 : target_vector->capacity * 2;
+        (target_vector->capacity == 0) ?
+        (4) : (target_vector->capacity * 2);
       target_vector->data =
         tge_xrealloc (target_vector->data,
                       target_vector->capacity *
@@ -191,12 +194,12 @@ auto_run_deferred_func (void PTR function_slot_address)
 }
 
 TGE_VISIBLE void
-register_gc_root (gc_root_handle_t handle, // <------- FIXME: GET RID OF THIS
+register_gc_root (gc_root_handle_t handle,
                   gc_cell_t cell)
 {
   struct gc_root_handle PTR mutable_handle =
     (struct gc_root_handle PTR) handle;
-  PUT ((struct gc_cell PPTR) (PTR_TO mutable_handle->live_cell)) =
+  PUT ((struct gc_cell PPTR) (PTR_TO mutable_handle->val)) =
     (struct gc_cell PTR) cell;
   vector_push (PTR_TO global_gc.roots, (struct gc_cell PTR) cell);
 }
@@ -205,13 +208,15 @@ TGE_VISIBLE void
 auto_unregister_gc_root (gc_root_handle_t handle)
 {
   size_t match_index = global_gc.roots.size;
-  for (size_t i = 0; i < global_gc.roots.size; i += 1)
-    if (global_gc.roots.data[i] == handle->live_cell)
+  for (size_t i = 0; i != global_gc.roots.size; i += 1)
+    if (global_gc.roots.data[i] == handle->val)
       match_index = i;
 
   if (match_index < global_gc.roots.size)
     {
-      for (size_t j = match_index; j < global_gc.roots.size - 1; j += 1)
+      for (size_t j = match_index;
+           j != global_gc.roots.size - 1;
+           j += 1)
         global_gc.roots.data[j] = global_gc.roots.data[j + 1];
       global_gc.roots.size -= 1;
     }
@@ -267,6 +272,21 @@ make_gc_object (gc_cell_t PTR children, size_t child_capacity,
   return (gc_cell_t) allocated_object;
 }
 
+struct gc_root_handle
+make_rooted_gc_object (gc_cell_t PTR children,
+                       size_t child_capacity,
+                       void PCPTR resources,
+                       size_t resource_capacity,
+                       void (*cleanup_hook) (void CPPTR, size_t))
+{
+  gc_cell_t cell = make_gc_object (children, child_capacity,
+                                   resources, resource_capacity,
+                                   cleanup_hook);
+  struct gc_root_handle handle = { .val = cell };
+  vector_push (PTR_TO global_gc.roots, (struct gc_cell PTR) cell);
+  return handle;
+}
+
 // TGE_VISIBLE void
 // gc_write_barrier (gc_cell_t source_node,
 //                   gc_cell_t target_node)
@@ -299,7 +319,7 @@ process_gray_node (struct gc_cell PTR processing_node,
   void PPTR targeted_handles = (void PPTR) processing_node->handles;
   processing_node->color = color_black;
   for (size_t child_index = 0;
-       child_index < processing_node->managed_count; child_index += 1)
+       child_index != processing_node->managed_count; child_index += 1)
     {
       size_t actual_slot = max_resource_capacity + child_index;
       struct gc_cell PTR child_ptr =
@@ -314,7 +334,8 @@ purge_and_free_dead_objects (size_t max_resource_capacity)
   size_t alive_count = 0;
   size_t updated_total_allocated_bytes = 0;
 
-  for (size_t array_index = 0; array_index < global_gc.all_objects.size;
+  for (size_t array_index = 0;
+       array_index != global_gc.all_objects.size;
        array_index += 1)
     {
       struct gc_cell PTR current_object =
@@ -349,14 +370,15 @@ purge_and_free_dead_objects (size_t max_resource_capacity)
 static void
 start_marking_phase ()
 {
-  for (size_t array_index = 0; array_index < global_gc.all_objects.size;
+  for (size_t array_index = 0;
+       array_index != global_gc.all_objects.size;
        array_index += 1)
     {
       global_gc.all_objects.data[array_index]->color = color_white;
       global_gc.all_objects.data[array_index]->marked_for_deletion =
         false;
     }
-  for (size_t root_index = 0; root_index < global_gc.roots.size;
+  for (size_t root_index = 0; root_index != global_gc.roots.size;
        root_index += 1)
     {
       struct gc_cell PTR local_root = global_gc.roots.data[root_index];
@@ -392,7 +414,7 @@ static void
 run_sweeping_increment (size_t work_units, size_t max_resource_capacity)
 {
   bool increment_active = true;
-  for (size_t individual_step = 0; individual_step < work_units;
+  for (size_t individual_step = 0; individual_step != work_units;
        individual_step += 1)
     if (increment_active)
       if (global_gc.sweep_index >= global_gc.all_objects.size)

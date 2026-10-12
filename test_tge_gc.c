@@ -322,6 +322,30 @@ main3 ()
 }
 
 int
+main4 ()
+{
+  printf ("Testing make_rooted_gc_object\n");
+  {
+    VPTR string[1] = { strdup ("test string") };
+    DECLARE_GC_ROOT x = make_rooted_gc_object (nullptr, 0, string, 1,
+                                               finalize_string);
+    for (size_t i = 0; i != 100; i += 1)
+      gc_step (1, 1);
+    //
+    // The following assertion is likely to segfault if the root is
+    // not working.
+    //
+    assert_true ("strcmp ((char CPCTR) (gc_get_handles_ptr (x.val)"
+                 " [0]), \"test string\") == 0)",
+                 strcmp ((char CPCTR) (gc_get_handles_ptr (x.val)[0]),
+                         "test string") == 0);
+  }
+  for (size_t i = 0; i != 100; i += 1)
+    gc_step (1, 1);
+  return 0;
+}
+
+int
 main ()
 {
   int status = main1 ();
@@ -329,5 +353,7 @@ main ()
     status = main2 ();
   if (status == 0)
     status = main3 ();
+  if (status == 0)
+    status = main4 ();
   return status;
 }

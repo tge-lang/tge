@@ -31,17 +31,10 @@
 #include <c_syntax.h>
 #include <stddef.h>
 
-struct gc_cell;
-typedef struct gc_cell CPCTR gc_cell_t;
-
-struct gc_root_handle;
-typedef struct gc_root_handle CPCTR gc_root_handle_t;
-struct gc_root_handle
-{
-  gc_cell_t live_cell;
-};
-
-void auto_unregister_gc_root (gc_root_handle_t handle);
+//----------------------------------------------------------------------
+//
+// Macros.
+//
 
 #define DECLARE_GC_ROOT                                                 \
         [[gnu::cleanup(auto_unregister_gc_root)]] struct gc_root_handle
@@ -67,18 +60,54 @@ void auto_unregister_gc_root (gc_root_handle_t handle);
         Type Variable = (Value); \
         GC_ROOT_HERE (Variable)
 
+//----------------------------------------------------------------------
+//
+// Types.
+//
+
+struct gc_cell;
+typedef struct gc_cell CPCTR gc_cell_t;
+
+struct gc_root_handle;
+typedef struct gc_root_handle CPCTR gc_root_handle_t;
+struct gc_root_handle
+{
+  gc_cell_t val;
+};
+
+//----------------------------------------------------------------------
+//
+// Functions.
+//
+
+void register_gc_root (gc_root_handle_t handle, gc_cell_t cell);
+void auto_unregister_gc_root (gc_root_handle_t handle);
+
 gc_cell_t make_gc_object (gc_cell_t PTR children,
                           size_t child_capacity,
                           void PCPTR resources,
                           size_t resource_capacity,
-                          void (*cleanup_hook) (void CPPTR,
-                                                size_t));
-extern char CPCTR unknown_gc_object_type;
+                          void (*cleanup_hook) (void CPPTR, size_t));
 
-void register_gc_root (gc_root_handle_t handle,
-                       gc_cell_t cell);
+//
+// DECLARE_GC_ROOT rooted_var = make_rooted_gc_object (...);
+//    ...
+// Do stuff with rooted_var.val;
+//    ...
+//
+struct gc_root_handle
+make_rooted_gc_object (gc_cell_t PTR children,
+                       size_t child_capacity,
+                       void PCPTR resources,
+                       size_t resource_capacity,
+                       void (*cleanup_hook) (void CPPTR, size_t));
+
+//
+// FIXME: I do not believe this is needed.
+//
 // void gc_write_barrier (gc_cell_t source_node,
 //                        gc_cell_t target_node);
+
 void gc_step (size_t work_units, size_t max_resource_capacity);
 void CPCPTR gc_get_handles_ptr (const gc_cell_t current_cell);
 
@@ -91,5 +120,7 @@ size_t gc_get_roots_size_ ();
 unsigned char gc_get_phase_ ();
 void gc_set_density_threshold (size_t threshold);
 void gc_reset_engine_ ();
+
+//----------------------------------------------------------------------
 
 #endif /* TGE__TGE_GC_H__INCLUDED__ */
