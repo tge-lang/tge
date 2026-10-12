@@ -37,7 +37,7 @@
 //
 
 #define DECLARE_GC_ROOT                                                 \
-        [[gnu::cleanup(auto_unregister_gc_root)]] struct gc_root_handle
+        [[gnu::cleanup(auto_unregister_gc_root)]] struct gc_root
 
 //
 // Call GC_ROOT_HERE(...) as shorthand for declaring a root in a stack
@@ -68,26 +68,28 @@
 struct gc_cell;
 typedef struct gc_cell CPCTR gc_cell_t;
 
-struct gc_root_handle;
-typedef struct gc_root_handle CPCTR gc_root_handle_t;
-struct gc_root_handle
+struct gc_root;
+typedef struct gc_root CPCTR gc_root_t;
+struct gc_root
 {
   gc_cell_t val;
 };
+
+typedef void gc_finalizer_t (VPTR);
 
 //----------------------------------------------------------------------
 //
 // Functions.
 //
 
-void register_gc_root (gc_root_handle_t handle, gc_cell_t cell);
-void auto_unregister_gc_root (gc_root_handle_t handle);
+void register_gc_root (gc_root_t handle, gc_cell_t cell);
+void auto_unregister_gc_root (gc_root_t handle);
 
 gc_cell_t make_gc_object (gc_cell_t PTR children,
                           size_t child_capacity,
-                          void PCPTR resources,
-                          size_t resource_capacity,
-                          void (*cleanup_hook) (void CPPTR, size_t));
+                          void PTR data,
+                          size_t data_size,
+                          gc_finalizer_t PTR finalizer);
 
 //
 // DECLARE_GC_ROOT rooted_var = make_rooted_gc_object (...);
@@ -95,24 +97,19 @@ gc_cell_t make_gc_object (gc_cell_t PTR children,
 // Do stuff with rooted_var.val;
 //    ...
 //
-struct gc_root_handle
+struct gc_root
 make_rooted_gc_object (gc_cell_t PTR children,
                        size_t child_capacity,
-                       void PCPTR resources,
-                       size_t resource_capacity,
-                       void (*cleanup_hook) (void CPPTR, size_t));
+                       void PTR data,
+                       size_t data_size,
+                       gc_finalizer_t PTR finalizer);
 
-//
-// FIXME: I do not believe this is needed.
-//
-// void gc_write_barrier (gc_cell_t source_node,
-//                        gc_cell_t target_node);
+void gc_step (size_t work_units);
 
-void gc_step (size_t work_units, size_t max_resource_capacity);
-void CPCPTR gc_get_handles_ptr (const gc_cell_t current_cell);
+size_t gc_child_count (gc_cell_t);
 
-size_t gc_get_resource_count (const gc_cell_t current_cell);
-size_t gc_get_managed_count (const gc_cell_t current_cell);
+VCPTR gc_data (gc_cell_t);
+size_t gc_data_size (gc_cell_t);
 
 size_t gc_get_allocated_bytes_ ();
 size_t gc_get_heap_size_ ();

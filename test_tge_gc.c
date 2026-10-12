@@ -57,10 +57,9 @@ assert_true (const char PTR test_name, bool condition)
 }
 
 static void
-sample_localized_finalizer (VCPPTR handles_array, size_t count)
+sample_localized_finalizer (VPTR data)
 {
-  for (size_t index = 0; index != count; index += 1)
-    free ((VPTR) handles_array[index]);
+  free (GET ((VPPTR) data));
   global_finalizer_calls += 1;
 }
 
@@ -76,7 +75,7 @@ static void
 test_nested_lexical_scope_roots ()
 {
   assert_true ("Baseline root tracking stack is empty",
-               gc_get_roots_size_ () == 0);
+               gc_roots_size_ () == 0);
   {
     DECLARE_GC_ROOT outer_frame_root;
     gc_cell_t obj_a =
@@ -84,7 +83,7 @@ test_nested_lexical_scope_roots ()
     register_gc_root (PTR_TO outer_frame_root, obj_a);
 
     assert_true ("Outer let-frame correctly pushes variable"
-                 " pointer to roots stack", gc_get_roots_size_ () == 1);
+                 " pointer to roots stack", gc_roots_size_ () == 1);
     {
       DECLARE_GC_ROOT inner_frame_root;
       gc_cell_t obj_b =
@@ -92,14 +91,14 @@ test_nested_lexical_scope_roots ()
       register_gc_root (PTR_TO inner_frame_root, obj_b);
 
       assert_true ("Inner nested let-frame tracks combined"
-                   " concurrent roots", gc_get_roots_size_ () == 2);
+                   " concurrent roots", gc_roots_size_ () == 2);
     }
     assert_true ("Exiting inner block popped nested"
                  " handle from roots array",
-                 gc_get_roots_size_ () == 1);
+                 gc_roots_size_ () == 1);
   }
   assert_true ("Exiting final outer block unrolled active"
-               " roots back to zero", gc_get_roots_size_ () == 0);
+               " roots back to zero", gc_roots_size_ () == 0);
   gc_reset_engine_ ();
 }
 
@@ -112,16 +111,16 @@ test_immutable_allocation_and_linking ()
 
   gc_cell_t root_node =
     make_gc_object (child_view, 1, nullptr, 0, nullptr);
-  VCPCPTR root_handles = gc_get_handles_ptr (root_node);
+  VCPTR root_data = gc_data (root_node);
 
   assert_true ("Immutable cell tracked object "
                "children limits via query functions",
-               gc_get_managed_count (root_node) == 1);
+               gc_child_count (root_node) == 1);
   assert_true ("Dynamic heap size tracks both created elements",
-               gc_get_heap_size_ () == 2);
+               gc_heap_size_ () == 2);
   assert_true ("Memcpy preserved direct memory mapping "
-               "inside FAM payload segment",
-               (gc_cell_t) (GET (root_handles)) == child_node);
+               "inside attachment",
+               (GET ((gc_cell_t PTR) root_data)) == child_node);
 
   gc_reset_engine_ ();
 }
@@ -139,13 +138,13 @@ test_cache_friendly_marking_traversal ()
     DECLARE_GC_ROOT scope_root;
     register_gc_root (PTR_TO scope_root, tree_root);
 
-    gc_step (1, 0);
+    gc_step (1);
     assert_true ("Collector phase stepped forward into marking cycle",
-                 gc_get_phase_ () == 1);
+                 gc_phase_ () == 1);
 
-    gc_step (1, 0);
+    gc_step (1);
     assert_true ("Trace advanced and mapped the internal container",
-                 gc_get_phase_ () == 1);
+                 gc_phase_ () == 1);
   }
   gc_reset_engine_ ();
 }
@@ -153,25 +152,25 @@ test_cache_friendly_marking_traversal ()
 static void
 test_localized_unmanaged_resource_finalization ()
 {
-  VPTR resource_payload = malloc (16);
-  if (!resource_payload)
+  constexpr size_t data_size = 16;
+  VPTR data = malloc (data_size);
+  if (data == nullptr)
     exit (EXIT_FAILURE);
-  const size_t max_resource_capacity = 1;
   global_finalizer_calls = 0;
 
-  VPCPTR resource_view = (VPCPTR) &resource_payload;
-  make_gc_object (nullptr, 0, resource_view, max_resource_capacity,
+  VPPTR view = PTR_TO data;
+  make_gc_object (nullptr, 0, view, sizeof (VPPTR),
                   sample_localized_finalizer);
   assert_true ("Allocation heap maps raw node",
-               gc_get_heap_size_ () == 1);
+               gc_heap_size_ () == 1);
 
-  gc_step (1, max_resource_capacity);
-  while (gc_get_phase_ () != 0)
-    gc_step (1, max_resource_capacity);
+  gc_step (1);
+  while (gc_phase_ () != 0)
+    gc_step (1);
 
   assert_true ("Pure incremental mark-sweep "
                "flushed unanchored memory block",
-               gc_get_heap_size_ () == 0);
+               gc_heap_size_ () == 0);
   assert_true ("Object finalizer callback triggered "
                "from base address index 0",
                global_finalizer_calls == 1);
@@ -194,8 +193,8 @@ test_adaptive_allocation_density_trigger ()
     make_gc_object (nullptr, 0, nullptr, 0, nullptr);
 
     assert_true ("Adaptive allocation engine bounded memory growth",
-                 gc_get_phase_ () != 0 ||
-                 gc_get_allocated_bytes_ () < 200);
+                 gc_phase_ () != 0 ||
+                 gc_allocated_bytes_ () < 200);
   }
   gc_set_density_threshold (0);
   gc_reset_engine_ ();
@@ -262,13 +261,9 @@ main1 ()
 }
 
 static void
-finalize_string (VCPPTR s, size_t n)
+finalize_string (VPTR data)
 {
-  for (size_t i = 0; i != n; i += 1)
-    {
-      free ((VPTR) s[i]);
-      s[i] = nullptr;
-    }
+  free (GET ((VPPTR) data));
   assert_true ("string finalized", true);
 }
 
@@ -278,22 +273,21 @@ main2 ()
   printf ("Testing GC_ROOT_HERE\n");
   {
     VPTR string[1] = { strdup ("test string") };
-    gc_cell_t x = make_gc_object (nullptr, 0, string, 1,
-                                  finalize_string);
+    gc_cell_t x = make_gc_object (nullptr, 0, PTR_TO string,
+                                  sizeof string, finalize_string);
     GC_ROOT_HERE (x);
     for (size_t i = 0; i != 100; i += 1)
-      gc_step (1, 1);
+      gc_step (1);
     //
     // The following assertion is likely to segfault if the root is
     // not working.
     //
-    assert_true ("strcmp ((char CPCTR) (gc_get_handles_ptr (x) [0]), "
-                 "\"test string\") == 0)",
-                 strcmp ((char CPCTR) (gc_get_handles_ptr (x)[0]),
+    assert_true ("string matches",
+                 strcmp (GET ((char PCPCTR) (gc_data (x))),
                          "test string") == 0);
   }
   for (size_t i = 0; i != 100; i += 1)
-    gc_step (1, 1);
+    gc_step (1);
   return 0;
 }
 
@@ -303,21 +297,21 @@ main3 ()
   printf ("Testing GC_ROOT\n");
   {
     VPTR string[1] = { strdup ("test string") };
-    GC_ROOT (gc_cell_t, x, make_gc_object (nullptr, 0, string, 1,
-                                           finalize_string));
+    GC_ROOT (gc_cell_t, x,
+             make_gc_object (nullptr, 0, PTR_TO string,
+                             sizeof string, finalize_string));
     for (size_t i = 0; i != 100; i += 1)
-      gc_step (1, 1);
+      gc_step (1);
     //
     // The following assertion is likely to segfault if the root is
     // not working.
     //
-    assert_true ("strcmp ((char CPCTR) (gc_get_handles_ptr (x) [0]), "
-                 "\"test string\") == 0)",
-                 strcmp ((char CPCTR) (gc_get_handles_ptr (x)[0]),
+    assert_true ("string matches",
+                 strcmp (GET ((char PCPCTR) (gc_data (x))),
                          "test string") == 0);
   }
   for (size_t i = 0; i != 100; i += 1)
-    gc_step (1, 1);
+    gc_step (1);
   return 0;
 }
 
@@ -327,33 +321,30 @@ main4 ()
   printf ("Testing make_rooted_gc_object\n");
   {
     VPTR string[1] = { strdup ("test string") };
-    DECLARE_GC_ROOT x = make_rooted_gc_object (nullptr, 0, string, 1,
-                                               finalize_string);
+    DECLARE_GC_ROOT x =
+      make_rooted_gc_object (nullptr, 0, PTR_TO string,
+                             sizeof string, finalize_string);
     for (size_t i = 0; i != 100; i += 1)
-      gc_step (1, 1);
+      gc_step (1);
     //
     // The following assertion is likely to segfault if the root is
     // not working.
     //
-    assert_true ("strcmp ((char CPCTR) (gc_get_handles_ptr (x.val)"
-                 " [0]), \"test string\") == 0)",
-                 strcmp ((char CPCTR) (gc_get_handles_ptr (x.val)[0]),
+    assert_true ("string matches",
+                 strcmp (GET ((char PCPCTR) (gc_data (x.val))),
                          "test string") == 0);
   }
   for (size_t i = 0; i != 100; i += 1)
-    gc_step (1, 1);
+    gc_step (1);
   return 0;
 }
 
 int
 main ()
 {
-  int status = main1 ();
-  if (status == 0)
-    status = main2 ();
-  if (status == 0)
-    status = main3 ();
-  if (status == 0)
-    status = main4 ();
-  return status;
+  int status1 = main1 ();
+  int status2 = main2 ();
+  int status3 = main3 ();
+  int status4 = main4 ();
+  return (status1 + status2 + status3 + status4);
 }
