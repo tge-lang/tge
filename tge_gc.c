@@ -290,13 +290,20 @@ make_rooted_gc_object (gc_cell_t PTR children, size_t child_capacity,
 }
 
 static void
-shade_flat_child (struct gc_cell PTR node)
+start_marking_phase ()
 {
-  if (node != nullptr && node->color == color_white)
+  for (size_t i = 0; i != global_gc.all_objects.length; i += 1)
     {
-      ((struct gc_cell PTR) node)->color = color_gray;
-      vector_push (PTR_TO global_gc.gray_stack, node);
+      global_gc.all_objects.data[i]->color = color_white;
+      global_gc.all_objects.data[i]->marked_for_deletion = false;
     }
+  for (size_t i = 0; i != global_gc.roots.length; i += 1)
+    {
+      struct gc_cell PTR local_root = global_gc.roots.data[i];
+      local_root->color = color_gray;
+      vector_push (PTR_TO global_gc.gray_stack, local_root);
+    }
+  global_gc.phase = gc_marking;
 }
 
 static void
@@ -306,7 +313,31 @@ process_gray_node (struct gc_cell PTR node)
 
   struct gc_cell PPTR children = gc_children (node);
   for (size_t i = 0; i != node->child_count; i += 1)
-    shade_flat_child (children[i]);
+    if (children[i] != nullptr && children[i]->color == color_white)
+      {
+        ((struct gc_cell PTR) children[i])->color = color_gray;
+        vector_push (PTR_TO global_gc.gray_stack, children[i]);
+      }
+}
+
+static void
+run_marking_increment (size_t work_units)
+{
+  size_t i = 0;
+  while ((i != work_units)
+         * (!vector_is_empty (PTR_TO global_gc.gray_stack)))
+    {
+      struct gc_cell PTR targets_node =
+        vector_top (PTR_TO global_gc.gray_stack);
+      vector_pop (PTR_TO global_gc.gray_stack);
+      process_gray_node (targets_node);
+      i += 1;
+    }
+  if (i != work_units)
+    {
+      global_gc.phase = gc_sweeping;
+      global_gc.sweep_index = 0;
+    }
 }
 
 static void
@@ -333,44 +364,6 @@ purge_and_free_obsolete_objects ()
 
   global_gc.all_objects.length = alive_count;
   global_gc.allocated_bytes = total_bytes;
-}
-
-static void
-start_marking_phase ()
-{
-  for (size_t i = 0; i != global_gc.all_objects.length; i += 1)
-    {
-      global_gc.all_objects.data[i]->color = color_white;
-      global_gc.all_objects.data[i]->marked_for_deletion = false;
-    }
-  for (size_t i = 0; i != global_gc.roots.length; i += 1)
-    {
-      struct gc_cell PTR local_root = global_gc.roots.data[i];
-      local_root->color = color_gray;
-      vector_push (PTR_TO global_gc.gray_stack, local_root);
-    }
-  global_gc.phase = gc_marking;
-}
-
-static void
-run_marking_increment (size_t work_units)
-{
-  bool increment_active = true;
-  for (size_t i = 0; i != work_units; i += 1)
-    if (increment_active)
-      if (vector_is_empty (PTR_TO global_gc.gray_stack))
-        {
-          global_gc.phase = gc_sweeping;
-          global_gc.sweep_index = 0;
-          increment_active = false;
-        }
-      else
-        {
-          struct gc_cell PTR targets_node =
-            vector_top (PTR_TO global_gc.gray_stack);
-          vector_pop (PTR_TO global_gc.gray_stack);
-          process_gray_node (targets_node);
-        }
 }
 
 static void
