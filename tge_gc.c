@@ -58,9 +58,9 @@ typedef struct
 
 typedef enum:unsigned char
 {
-  gc_idle,
-  gc_marking,
-  gc_sweeping
+  gc_idle = 0,
+  gc_marking = 1,
+  gc_sweeping = 2
 } gc_phase_state;
 
 typedef struct
@@ -292,6 +292,10 @@ make_rooted_gc_object (gc_cell_t PTR children, size_t child_capacity,
 static void
 start_marking_phase ()
 {
+  //
+  // Mark everything white, except the roots, which we mark gray and
+  // put in a stack.
+  //
   for (size_t i = 0; i != global_gc.all_objects.length; i += 1)
     {
       global_gc.all_objects.data[i]->color = color_white;
@@ -323,6 +327,12 @@ process_gray_node (struct gc_cell PTR node)
 static void
 run_marking_increment (size_t work_units)
 {
+  //
+  // Do at most work_units of work.
+  //
+  // Go through the gray nodes and progressively paint them first gray
+  // and then black.
+  //
   size_t i = 0;
   while ((i != work_units)
          * (!vector_is_empty (PTR_TO global_gc.gray_stack)))
@@ -369,6 +379,11 @@ purge_and_free_obsolete_objects ()
 static void
 run_sweeping_increment (size_t work_units)
 {
+  //
+  // Do at most work_units of work.
+  //
+  // Sweep up white objects.
+  //
   size_t i = 0;
   while ((i != work_units)
          * (global_gc.sweep_index < global_gc.all_objects.length))
@@ -390,6 +405,9 @@ run_sweeping_increment (size_t work_units)
 TGE_VISIBLE void
 gc_step (size_t work_units)
 {
+  //
+  // A state machine doing at most work_units of work.
+  //
   if (global_gc.phase == gc_idle)
     start_marking_phase ();
   else if (global_gc.phase == gc_marking)
