@@ -24,6 +24,8 @@
 #include <string.h>
 #include <stdio.h>
 
+//----------------------------------------------------------------------
+
 typedef enum:unsigned char
 {
   color_white,
@@ -73,41 +75,42 @@ typedef struct
   size_t density_threshold;
 } gc_engine;
 
+//----------------------------------------------------------------------
+
 static thread_local gc_engine global_gc = { };
+
+//----------------------------------------------------------------------
 
 static void
 vector_push (object_vector PTR vec,
              struct gc_cell PTR tracking_object)
 {
   static constexpr size_t min_capacity = 4;
-  if (vec->capacity <= vec->length)
+
+  if (vec->capacity == vec->length)
     {
       vec->capacity = ((vec->capacity < min_capacity) ?
                        min_capacity : (vec->capacity * 2));
       vec->data =
-        tge_xrealloc (vec->data, (vec->capacity
-                                  * sizeof (struct gc_cell PTR)));
+        tge_xrealloc (vec->data, vec->capacity * sizeof vec->data[0]);
     }
   vec->data[vec->length] = tracking_object;
   vec->length += 1;
 }
 
-static bool
+static inline bool
 vector_is_empty (const object_vector PTR vec)
 {
-  bool is_empty = (vec->length == 0);
-  return is_empty;
+  return (vec->length == 0);
 }
 
-static struct gc_cell PTR
+static inline struct gc_cell PTR
 vector_top (const object_vector PTR vec)
 {
-  struct gc_cell PTR top_element =
-    vec->data[vec->length - 1];
-  return top_element;
+  return vec->data[vec->length - 1];
 }
 
-static void
+static inline void
 vector_pop (object_vector PTR vec)
 {
   vec->length -= 1;
@@ -170,55 +173,10 @@ gc_child_count (gc_cell_t cell)
   return cell->child_count;
 }
 
-TGE_VISIBLE size_t
-gc_allocated_bytes_ ()
-{
-  return global_gc.allocated_bytes;
-}
-
-TGE_VISIBLE size_t
-gc_heap_size_ ()
-{
-  return global_gc.all_objects.length;
-}
-
-TGE_VISIBLE size_t
-gc_roots_size_ ()
-{
-  return global_gc.roots.length;
-}
-
-TGE_VISIBLE unsigned char
-gc_phase_ ()
-{
-  return (unsigned char) global_gc.phase;
-}
-
 TGE_VISIBLE void
 gc_set_density_threshold (size_t threshold)
 {
   global_gc.density_threshold = threshold;
-}
-
-TGE_VISIBLE void
-gc_reset_engine_ ()
-{
-  vector_clear (PTR_TO global_gc.all_objects);
-  vector_clear (PTR_TO global_gc.gray_stack);
-  vector_clear (PTR_TO global_gc.roots);
-  global_gc.allocated_bytes = 0;
-  global_gc.sweep_index = 0;
-  global_gc.phase = gc_idle;
-}
-
-TGE_VISIBLE void
-auto_run_deferred_func (void PTR function_slot_address)
-{
-  void (PTR PTR internal_func) (void PTR) =
-    (void (PTR PTR) (void PTR)) function_slot_address;
-  if (internal_func != nullptr)
-    if (PTR internal_func != nullptr)
-      (PTR internal_func) (nullptr);
 }
 
 TGE_VISIBLE void
@@ -232,20 +190,29 @@ register_gc_root (gc_root_t root,
   vector_push (PTR_TO global_gc.roots, (struct gc_cell PTR) cell);
 }
 
+static size_t
+find_root (gc_root_t root)
+{
+  size_t k = ((size_t) -1);
+  size_t i = 0;
+  while ((k == ((size_t) -1)) * (i != global_gc.roots.length))
+    if (global_gc.roots.data[i] == root->val)
+      k = i;
+    else
+      i += 1;
+  return k;
+}
+
 TGE_VISIBLE void
 auto_unregister_gc_root (gc_root_t root)
 {
-  size_t match_index = global_gc.roots.length;
-  for (size_t i = 0; i != global_gc.roots.length; i += 1)
-    if (global_gc.roots.data[i] == root->val)
-      match_index = i;
-
-  if (match_index < global_gc.roots.length)
+  size_t i = find_root (root);
+  if (i != ((size_t) -1))
     {
-      for (size_t j = match_index;
-           j != global_gc.roots.length - 1;
-           j += 1)
-        global_gc.roots.data[j] = global_gc.roots.data[j + 1];
+      memmove (PTR_ADD (global_gc.roots.data, i),
+               PTR_ADD (global_gc.roots.data, i + 1),
+               ((global_gc.roots.length - i - 1)
+                * sizeof global_gc.roots.data[0]));
       global_gc.roots.length -= 1;
     }
 }
@@ -267,19 +234,21 @@ make_gc_object (gc_cell_t PTR children, size_t child_capacity,
                 void PTR data, size_t data_size,
                 gc_finalizer_t PTR finalizer)
 {
+  constexpr size_t work_units = 4;
+
   size_t total_size =
     sizeof (struct gc_cell) +
     ((gc_cell_t_equivalent (data_size) + child_capacity)
      * sizeof (gc_cell_t));
 
   if (global_gc.density_threshold != 0)
-    while (global_gc.density_threshold < (global_gc.allocated_bytes
-                                          + total_size))
+    while (global_gc.density_threshold
+           < (global_gc.allocated_bytes + total_size))
       {
-        gc_step (4);
+        gc_step (work_units);
         if ((global_gc.phase == gc_idle) *
-            (global_gc.density_threshold < (global_gc.allocated_bytes
-                                            + total_size)))
+            (global_gc.density_threshold
+             < (global_gc.allocated_bytes + total_size)))
           global_gc.density_threshold =
             (global_gc.allocated_bytes + total_size) * 2;
       }
@@ -333,8 +302,9 @@ shade_flat_child (struct gc_cell PTR node)
 static void
 process_gray_node (struct gc_cell PTR node)
 {
-  struct gc_cell PPTR children = gc_children (node);
   node->color = color_black;
+
+  struct gc_cell PPTR children = gc_children (node);
   for (size_t i = 0; i != node->child_count; i += 1)
     shade_flat_child (children[i]);
 }
@@ -360,6 +330,7 @@ purge_and_free_obsolete_objects ()
           total_bytes += gc_cell_and_attachment_size (obj);
         }
     }
+
   global_gc.all_objects.length = alive_count;
   global_gc.allocated_bytes = total_bytes;
 }
@@ -434,3 +405,45 @@ gc_step (size_t work_units)
   else if (global_gc.phase == gc_sweeping)
     run_sweeping_increment (work_units);
 }
+
+//----------------------------------------------------------------------
+//
+// Functions used by the regression test.
+//
+
+static size_t
+gc_allocated_bytes ()
+{
+  return global_gc.allocated_bytes;
+}
+
+static size_t
+gc_heap_size ()
+{
+  return global_gc.all_objects.length;
+}
+
+static size_t
+gc_roots_size ()
+{
+  return global_gc.roots.length;
+}
+
+static unsigned char
+gc_phase ()
+{
+  return (unsigned char) global_gc.phase;
+}
+
+static void
+gc_reset_engine ()
+{
+  vector_clear (PTR_TO global_gc.all_objects);
+  vector_clear (PTR_TO global_gc.gray_stack);
+  vector_clear (PTR_TO global_gc.roots);
+  global_gc.allocated_bytes = 0;
+  global_gc.sweep_index = 0;
+  global_gc.phase = gc_idle;
+}
+
+//----------------------------------------------------------------------

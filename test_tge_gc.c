@@ -75,7 +75,7 @@ static void
 test_nested_lexical_scope_roots ()
 {
   assert_true ("Baseline root tracking stack is empty",
-               gc_roots_size_ () == 0);
+               gc_roots_size () == 0);
   {
     DECLARE_GC_ROOT outer_frame_root;
     gc_cell_t obj_a =
@@ -83,7 +83,7 @@ test_nested_lexical_scope_roots ()
     register_gc_root (PTR_TO outer_frame_root, obj_a);
 
     assert_true ("Outer let-frame correctly pushes variable"
-                 " pointer to roots stack", gc_roots_size_ () == 1);
+                 " pointer to roots stack", gc_roots_size () == 1);
     {
       DECLARE_GC_ROOT inner_frame_root;
       gc_cell_t obj_b =
@@ -91,15 +91,15 @@ test_nested_lexical_scope_roots ()
       register_gc_root (PTR_TO inner_frame_root, obj_b);
 
       assert_true ("Inner nested let-frame tracks combined"
-                   " concurrent roots", gc_roots_size_ () == 2);
+                   " concurrent roots", gc_roots_size () == 2);
     }
     assert_true ("Exiting inner block popped nested"
                  " handle from roots array",
-                 gc_roots_size_ () == 1);
+                 gc_roots_size () == 1);
   }
   assert_true ("Exiting final outer block unrolled active"
-               " roots back to zero", gc_roots_size_ () == 0);
-  gc_reset_engine_ ();
+               " roots back to zero", gc_roots_size () == 0);
+  gc_reset_engine ();
 }
 
 static void
@@ -117,12 +117,12 @@ test_immutable_allocation_and_linking ()
                "children limits via query functions",
                gc_child_count (root_node) == 1);
   assert_true ("Dynamic heap size tracks both created elements",
-               gc_heap_size_ () == 2);
+               gc_heap_size () == 2);
   assert_true ("Memcpy preserved direct memory mapping "
                "inside attachment",
                (GET ((gc_cell_t PTR) root_data)) == child_node);
 
-  gc_reset_engine_ ();
+  gc_reset_engine ();
 }
 
 static void
@@ -140,13 +140,13 @@ test_cache_friendly_marking_traversal ()
 
     gc_step (1);
     assert_true ("Collector phase stepped forward into marking cycle",
-                 gc_phase_ () == 1);
+                 gc_phase () == 1);
 
     gc_step (1);
     assert_true ("Trace advanced and mapped the internal container",
-                 gc_phase_ () == 1);
+                 gc_phase () == 1);
   }
-  gc_reset_engine_ ();
+  gc_reset_engine ();
 }
 
 static void
@@ -162,19 +162,19 @@ test_localized_unmanaged_resource_finalization ()
   make_gc_object (nullptr, 0, view, sizeof (VPPTR),
                   sample_localized_finalizer);
   assert_true ("Allocation heap maps raw node",
-               gc_heap_size_ () == 1);
+               gc_heap_size () == 1);
 
   gc_step (1);
-  while (gc_phase_ () != 0)
+  while (gc_phase () != 0)
     gc_step (1);
 
   assert_true ("Pure incremental mark-sweep "
                "flushed unanchored memory block",
-               gc_heap_size_ () == 0);
+               gc_heap_size () == 0);
   assert_true ("Object finalizer callback triggered "
                "from base address index 0",
                global_finalizer_calls == 1);
-  gc_reset_engine_ ();
+  gc_reset_engine ();
 }
 
 static void
@@ -193,11 +193,11 @@ test_adaptive_allocation_density_trigger ()
     make_gc_object (nullptr, 0, nullptr, 0, nullptr);
 
     assert_true ("Adaptive allocation engine bounded memory growth",
-                 gc_phase_ () != 0 ||
-                 gc_allocated_bytes_ () < 200);
+                 gc_phase () != 0 ||
+                 gc_allocated_bytes () < 200);
   }
   gc_set_density_threshold (0);
-  gc_reset_engine_ ();
+  gc_reset_engine ();
 }
 
 static int

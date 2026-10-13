@@ -111,13 +111,8 @@ size_t gc_child_count (gc_cell_t);
 VCPTR gc_data (gc_cell_t);
 size_t gc_data_size (gc_cell_t);
 
-size_t gc_get_allocated_bytes_ ();
-size_t gc_get_heap_size_ ();
-size_t gc_get_roots_size_ ();
-unsigned char gc_get_phase_ ();
 void gc_set_density_threshold (size_t threshold);
-void gc_reset_engine_ ();
 
 //----------------------------------------------------------------------
 
-#endif /* TGE__TGE_GC_H__INCLUDED__ */
+#endif // TGE__TGE_GC_H__INCLUDED__
