@@ -68,8 +68,8 @@ for i in 8 16 32; do
     INDENT_FLAGS="${INDENT_FLAGS}${INDENT_FLAGS+ }-Tchar${i}_t"
 done
 
-CHEM_C23_FLAGS([c23_flags])
-CFLAGS="${CFLAGS}${CFLAGS+ }${c23_flags}"
+CHEM_C2Y_FLAGS([c2y_flags])
+CFLAGS="${CFLAGS}${CFLAGS+ }${c2y_flags}"
 CHEM_GNU_C_FLAGS([hidden_flags],[-fPIC -fvisibility=hidden])
 CFLAGS="${CFLAGS}${CFLAGS+ }${hidden_flags}"
 
@@ -77,7 +77,9 @@ CHEM_GNU_C_FLAGS([visible_flags],[-fPIC -fvisibility=default])
 AC_SUBST([VISIBLE_CFLAGS],["${visible_flags}"])
 
 m4_include([c_attributes.ac])
-m4_include([indent.ac])
+#m4_include([indent.ac])
+m4_include([uncrustify.ac])
+
 
 # CHEM_PATH_PROGS_CACHED_AND_PRECIOUS([MERCURIAL],
 #   [Mercurial Distributed SCM],[hg],

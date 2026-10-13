@@ -1,10 +1,10 @@
 /*
 
-  Copyright © 2026 Barry Schwartz
-  
-  SPDX-License-Identifier: MIT
+   Copyright © 2026 Barry Schwartz
 
-*/
+   SPDX-License-Identifier: MIT
+
+ */
 
 #include <stdlib.h>
 #include <stdio.h>

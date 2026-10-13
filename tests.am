@@ -50,22 +50,28 @@ installcheck-local:: atconfig testsuite
 
 #---------------------------------------------------------------------
 
+CHECK_PROGRAM_SRC = $(check_PROGRAMS:%=%.c)
+
+#---------------------------------------------------------------------
+
+check_PROGRAMS += test_defer
+
+#---------------------------------------------------------------------
+
 check_PROGRAMS += test_spookyhash
-test_spookyhash_SOURCES = test_spookyhash.c
-test_spookyhash_SOURCES += spookyhash-reference.h
 test_spookyhash_DEPENDENCIES = spookyhash.c spookyhash.h
+test_spookyhash_DEPENDENCIES += spookyhash-reference.h
+EXTRA_DIST += spookyhash-reference.h
 
 #---------------------------------------------------------------------
 
 check_PROGRAMS += test_tge_gc
-test_tge_gc_SOURCES = test_tge_gc.c
 test_tge_gc_DEPENDENCIES = tge_gc.c tge_gc.h
 test_tge_gc_DEPENDENCIES += tge_xalloc.c tge_xalloc.h
 
 #---------------------------------------------------------------------
 
-check_PROGRAMS += test_utf32_t
-test_utf32_t_SOURCES = test_utf32_t.c
-test_utf32_t_LDADD = libtge.la
+check_PROGRAMS += test_tge_strings
+test_tge_strings_LDADD = libtge.la
 
 #---------------------------------------------------------------------

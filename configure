@@ -657,7 +657,7 @@ ifnGNUmake
 ifGNUmake
 GNU_MAKE
 GNU
-INDENT
+UNCRUSTIFY
 VISIBLE_CFLAGS
 INDENT_FLAGS
 enable_color
@@ -810,7 +810,7 @@ LDFLAGS
 LIBS
 CPPFLAGS
 LT_SYS_LIBRARY_PATH
-INDENT
+UNCRUSTIFY
 GNU_MAKE'
 
 
@@ -1477,7 +1477,7 @@ Some influential environment variables:
               you have headers in a nonstandard directory <include dir>
   LT_SYS_LIBRARY_PATH
               User-defined run-time library search path.
-  INDENT      GNU indent
+  UNCRUSTIFY  GNU uncrustify
   GNU_MAKE    GNU Make command
 
 Use these variables to override the choices made by 'configure' or to help
@@ -15166,9 +15166,9 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
   { :;
-   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -std=c2x" >&5
-printf %s "checking whether the C compiler accepts -std=c2x... " >&6; }
-if test ${ax_cv_check_cflags___std_c2x+y}
+   { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -std=c2y" >&5
+printf %s "checking whether the C compiler accepts -std=c2y... " >&6; }
+if test ${ax_cv_check_cflags___std_c2y+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
@@ -15177,7 +15177,7 @@ else case e in #(
   if test x"$GCC" = xyes ; then
     add_gnu_werror="-Werror"
   fi
-  CFLAGS="$CFLAGS  -std=c2x $add_gnu_werror"
+  CFLAGS="$CFLAGS  -std=c2y $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -15191,27 +15191,27 @@ main (void)
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
 then :
-  ax_cv_check_cflags___std_c2x=yes
+  ax_cv_check_cflags___std_c2y=yes
 else case e in #(
-  e) ax_cv_check_cflags___std_c2x=no ;;
+  e) ax_cv_check_cflags___std_c2y=no ;;
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
   CFLAGS=$ax_check_save_flags ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___std_c2x" >&5
-printf "%s\n" "$ax_cv_check_cflags___std_c2x" >&6; }
-if test "x$ax_cv_check_cflags___std_c2x" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___std_c2y" >&5
+printf "%s\n" "$ax_cv_check_cflags___std_c2y" >&6; }
+if test "x$ax_cv_check_cflags___std_c2y" = xyes
 then :
-  c23_flags="${c23_flags} -std=c2x"
+  c2y_flags="${c2y_flags} -std=c2y"
 else case e in #(
   e) : ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -std=c23" >&5
-printf %s "checking whether the C compiler accepts -std=c23... " >&6; }
-if test ${ax_cv_check_cflags___std_c23+y}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -std=gnu2y" >&5
+printf %s "checking whether the C compiler accepts -std=gnu2y... " >&6; }
+if test ${ax_cv_check_cflags___std_gnu2y+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
@@ -15220,7 +15220,7 @@ else case e in #(
   if test x"$GCC" = xyes ; then
     add_gnu_werror="-Werror"
   fi
-  CFLAGS="$CFLAGS  -std=c23 $add_gnu_werror"
+  CFLAGS="$CFLAGS  -std=gnu2y $add_gnu_werror"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -15234,106 +15234,20 @@ main (void)
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"
 then :
-  ax_cv_check_cflags___std_c23=yes
+  ax_cv_check_cflags___std_gnu2y=yes
 else case e in #(
-  e) ax_cv_check_cflags___std_c23=no ;;
+  e) ax_cv_check_cflags___std_gnu2y=no ;;
 esac
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
   CFLAGS=$ax_check_save_flags ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___std_c23" >&5
-printf "%s\n" "$ax_cv_check_cflags___std_c23" >&6; }
-if test "x$ax_cv_check_cflags___std_c23" = xyes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___std_gnu2y" >&5
+printf "%s\n" "$ax_cv_check_cflags___std_gnu2y" >&6; }
+if test "x$ax_cv_check_cflags___std_gnu2y" = xyes
 then :
-  c23_flags="${c23_flags} -std=c23"
-else case e in #(
-  e) : ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -std=gnu2x" >&5
-printf %s "checking whether the C compiler accepts -std=gnu2x... " >&6; }
-if test ${ax_cv_check_cflags___std_gnu2x+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-  ax_check_save_flags=$CFLAGS
-  if test x"$GCC" = xyes ; then
-    add_gnu_werror="-Werror"
-  fi
-  CFLAGS="$CFLAGS  -std=gnu2x $add_gnu_werror"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ax_cv_check_cflags___std_gnu2x=yes
-else case e in #(
-  e) ax_cv_check_cflags___std_gnu2x=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___std_gnu2x" >&5
-printf "%s\n" "$ax_cv_check_cflags___std_gnu2x" >&6; }
-if test "x$ax_cv_check_cflags___std_gnu2x" = xyes
-then :
-  c23_flags="${c23_flags} -std=gnu2x"
-else case e in #(
-  e) : ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether the C compiler accepts -std=gnu23" >&5
-printf %s "checking whether the C compiler accepts -std=gnu23... " >&6; }
-if test ${ax_cv_check_cflags___std_gnu23+y}
-then :
-  printf %s "(cached) " >&6
-else case e in #(
-  e)
-  ax_check_save_flags=$CFLAGS
-  if test x"$GCC" = xyes ; then
-    add_gnu_werror="-Werror"
-  fi
-  CFLAGS="$CFLAGS  -std=gnu23 $add_gnu_werror"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main (void)
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"
-then :
-  ax_cv_check_cflags___std_gnu23=yes
-else case e in #(
-  e) ax_cv_check_cflags___std_gnu23=no ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
-  CFLAGS=$ax_check_save_flags ;;
-esac
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___std_gnu23" >&5
-printf "%s\n" "$ax_cv_check_cflags___std_gnu23" >&6; }
-if test "x$ax_cv_check_cflags___std_gnu23" = xyes
-then :
-  c23_flags="${c23_flags} -std=gnu23"
+  c2y_flags="${c2y_flags} -std=gnu2y"
 else case e in #(
   e) : ;;
 esac
@@ -15347,12 +15261,10 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 fi
-  echo ${c23_flags} | ${GREP} -F -q std=gnu && \
-       c23_flags=`echo ${c23_flags} | sed -e 's/-std=c2x//g' -e 's/-std=c23//g'`
-  echo ${c23_flags} | ${GREP} -F -q 23 && \
-       c23_flags=`echo ${c23_flags} | sed -e 's/-std=c2x//g' -e 's/-std=gnu2x//g'`
+  echo ${c2y_flags} | ${GREP} -F -q std=gnu && \
+       c2y_flags=`echo ${c2y_flags} | sed -e 's/-std=c2y//g'`
 fi
-CFLAGS="${CFLAGS}${CFLAGS+ }${c23_flags}"
+CFLAGS="${CFLAGS}${CFLAGS+ }${c2y_flags}"
 { :;
    if test x"${GCC}" = xyes; then
       ac_ext=c
@@ -15617,23 +15529,24 @@ for attribute in noreturn nodiscard unsequenced; do
     INDENT_FLAGS="${INDENT_FLAGS}${INDENT_FLAGS+ }-TTGE_${_attr}"
 done
 
+#m4_include([indent.ac])
 #-----------------------------------------------------------------------
 # SPDX-License-Identifier: MIT
 #-----------------------------------------------------------------------
 
 { :;
 
-# Override the cache if the precious variable INDENT is set.
-test -n "${INDENT}" && unset ac_cv_path_INDENT
-chem_cv_path_INDENT_found=yes
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for indent" >&5
-printf %s "checking for indent... " >&6; }
-if test ${ac_cv_path_INDENT+y}
+# Override the cache if the precious variable UNCRUSTIFY is set.
+test -n "${UNCRUSTIFY}" && unset ac_cv_path_UNCRUSTIFY
+chem_cv_path_UNCRUSTIFY_found=yes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for uncrustify" >&5
+printf %s "checking for uncrustify... " >&6; }
+if test ${ac_cv_path_UNCRUSTIFY+y}
 then :
   printf %s "(cached) " >&6
 else case e in #(
-  e) if test -z "$INDENT"; then
-  ac_path_INDENT_found=false
+  e) if test -z "$UNCRUSTIFY"; then
+  ac_path_UNCRUSTIFY_found=false
   # Loop through the user's path and test for each of PROGNAME-LIST
   as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
 for as_dir in $PATH
@@ -15644,58 +15557,59 @@ do
     */) ;;
     *) as_dir=$as_dir/ ;;
   esac
-    for ac_prog in indent
+    for ac_prog in uncrustify
    do
     for ac_exec_ext in '' $ac_executable_extensions; do
-      ac_path_INDENT="$as_dir$ac_prog$ac_exec_ext"
-      as_fn_executable_p "$ac_path_INDENT" || continue
+      ac_path_UNCRUSTIFY="$as_dir$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_UNCRUSTIFY" || continue
 
-      if test -n "${INDENT}"; then
-         # Bypass the test if the precious variable INDENT is set.
-         ac_cv_path_INDENT="${INDENT}"
-         ac_path_INDENT_found=:
+      if test -n "${UNCRUSTIFY}"; then
+         # Bypass the test if the precious variable UNCRUSTIFY is set.
+         ac_cv_path_UNCRUSTIFY="${UNCRUSTIFY}"
+         ac_path_UNCRUSTIFY_found=:
       else
          # Run the test.
 
-    if LC_ALL=C LANG=C ${ac_path_INDENT} --version 2>&1 | \
-      LC_ALL=C LANG=C ${GREP} -e '^GNU indent' \
+    if LC_ALL=C LANG=C ${ac_path_UNCRUSTIFY} --version 2>&1 | \
+      LC_ALL=C LANG=C ${GREP} -e '^Uncrustify' \
                2> /dev/null > /dev/null; then
-      ac_cv_path_INDENT="${ac_path_INDENT}"
-      ac_path_INDENT_found=:
+      ac_cv_path_UNCRUSTIFY="${ac_path_UNCRUSTIFY}"
+      ac_path_UNCRUSTIFY_found=:
     fi
 
       fi
-      $ac_path_INDENT_found && break 3
+      $ac_path_UNCRUSTIFY_found && break 3
     done
   done
   done
 IFS=$as_save_IFS
-  if test -z "$ac_cv_path_INDENT"; then
+  if test -z "$ac_cv_path_UNCRUSTIFY"; then
     :
   fi
 else
-  ac_cv_path_INDENT=$INDENT
+  ac_cv_path_UNCRUSTIFY=$UNCRUSTIFY
 fi
 
-      if test -z "${ac_cv_path_INDENT}"; then
-         ac_cv_path_INDENT="not found"
-         chem_cv_path_INDENT_found=no
+      if test -z "${ac_cv_path_UNCRUSTIFY}"; then
+         ac_cv_path_UNCRUSTIFY="not found"
+         chem_cv_path_UNCRUSTIFY_found=no
       fi
     ;;
 esac
 fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_INDENT" >&5
-printf "%s\n" "$ac_cv_path_INDENT" >&6; }
-if test x"${chem_cv_path_INDENT_found}" = x"yes"; then
-   INDENT="${ac_cv_path_INDENT}"
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_UNCRUSTIFY" >&5
+printf "%s\n" "$ac_cv_path_UNCRUSTIFY" >&6; }
+if test x"${chem_cv_path_UNCRUSTIFY_found}" = x"yes"; then
+   UNCRUSTIFY="${ac_cv_path_UNCRUSTIFY}"
 else
-   INDENT=""
+   UNCRUSTIFY=""
    # Do not cache the negative result. That way someone can install
    # the program and have it be discovered, even though they did not
    # clear a cache entry.
-   unset ac_cv_path_INDENT
+   unset ac_cv_path_UNCRUSTIFY
 fi
 }
+
 
 
 # CHEM_PATH_PROGS_CACHED_AND_PRECIOUS([MERCURIAL],

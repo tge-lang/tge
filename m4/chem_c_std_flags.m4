@@ -7,7 +7,7 @@
 # notice and this notice are preserved.  This file is offered as-is,
 # without any warranty.
 
-# serial 1
+# serial 2
 
 m4_define([_chem_c_std_flags],
 [if true; then
@@ -31,4 +31,19 @@ AC_DEFUN([CHEM_C23_FLAGS],
        $1=`echo ${$1} | sed -e 's/-std=c2x//g' -e 's/-std=c23//g'`
   echo ${$1} | ${GREP} -F -q 23 && \
        $1=`echo ${$1} | sed -e 's/-std=c2x//g' -e 's/-std=gnu2x//g'`
+fi])
+
+# CHEM_C2Y_FLAGS(variable)
+# ------------------------
+#
+# Try to set variable to flag or flags for the best C2y
+# implementation. An implementation with extensions might be preferred
+# over a strict implementation.
+#
+AC_DEFUN([CHEM_C2Y_FLAGS],
+[AC_REQUIRE([AC_PROG_GREP])
+ if true; then
+  _chem_c_std_flags([$1],[-std=c2y -std=gnu2y])
+  echo ${$1} | ${GREP} -F -q std=gnu && \
+       $1=`echo ${$1} | sed -e 's/-std=c2y//g'`
 fi])
