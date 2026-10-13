@@ -376,23 +376,22 @@ run_marking_increment (size_t work_units)
 static void
 run_sweeping_increment (size_t work_units)
 {
-  bool increment_active = true;
-  for (size_t i = 0; i != work_units; i += 1)
-    if (increment_active)
-      if (global_gc.sweep_index >= global_gc.all_objects.length)
-        {
-          purge_and_free_obsolete_objects ();
-          global_gc.phase = gc_idle;
-          increment_active = false;
-        }
-      else
-        {
-          struct gc_cell PTR sweep_target =
-            global_gc.all_objects.data[global_gc.sweep_index];
-          if (sweep_target->color == color_white)
-            sweep_target->marked_for_deletion = true;
-          global_gc.sweep_index += 1;
-        }
+  size_t i = 0;
+  while ((i != work_units)
+         * (global_gc.sweep_index < global_gc.all_objects.length))
+    {
+      struct gc_cell PTR sweep_target =
+        global_gc.all_objects.data[global_gc.sweep_index];
+      if (sweep_target->color == color_white)
+        sweep_target->marked_for_deletion = true;
+      global_gc.sweep_index += 1;
+      i += 1;
+    }
+  if (i != work_units)
+    {
+      purge_and_free_obsolete_objects ();
+      global_gc.phase = gc_idle;
+    }
 }
 
 TGE_VISIBLE void
