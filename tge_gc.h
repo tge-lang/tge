@@ -23,8 +23,8 @@
 
 //----------------------------------------------------------------------
 //
-// An incremental garbage collector for persistent (immutable) data
-// structures.
+// An incremental mark-sweep garbage collector for persistent
+// (immutable) data structures.
 //
 //----------------------------------------------------------------------
 
