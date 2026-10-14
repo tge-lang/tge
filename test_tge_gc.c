@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <threads.h>
+#include <assert.h>
 
 typedef struct
 {
@@ -77,18 +78,14 @@ test_nested_lexical_scope_roots ()
   assert_true ("Baseline root tracking stack is empty",
                gc_roots_size () == 0);
   {
-    DECLARE_GC_ROOT outer_frame_root;
-    gc_cell_t obj_a =
-      make_gc_object (nullptr, 0, nullptr, 0, nullptr);
-    register_gc_root (PTR_TO outer_frame_root, obj_a);
+    GC_ROOT (auto, obj_a,
+             make_gc_object (nullptr, 0, nullptr, 0, nullptr));
 
     assert_true ("Outer let-frame correctly pushes variable"
                  " pointer to roots stack", gc_roots_size () == 1);
     {
-      DECLARE_GC_ROOT inner_frame_root;
-      gc_cell_t obj_b =
-        make_gc_object (nullptr, 0, nullptr, 0, nullptr);
-      register_gc_root (PTR_TO inner_frame_root, obj_b);
+      GC_ROOT (auto, obj_b,
+               make_gc_object (nullptr, 0, nullptr, 0, nullptr));
 
       assert_true ("Inner nested let-frame tracks combined"
                    " concurrent roots", gc_roots_size () == 2);
@@ -135,8 +132,7 @@ test_cache_friendly_marking_traversal ()
     make_gc_object (child_view, 1, nullptr, 0, nullptr);
 
   {
-    DECLARE_GC_ROOT scope_root;
-    register_gc_root (PTR_TO scope_root, tree_root);
+    GC_ROOT_HERE (auto, tree_root);
 
     gc_step (1);
     assert_true ("Collector phase stepped forward into marking cycle",
@@ -185,8 +181,7 @@ test_adaptive_allocation_density_trigger ()
   gc_cell_t active_anchor =
     make_gc_object (nullptr, 0, nullptr, 0, nullptr);
   {
-    DECLARE_GC_ROOT tracking_anchor;
-    register_gc_root (PTR_TO tracking_anchor, active_anchor);
+    GC_ROOT_HERE (auto, active_anchor);
 
     make_gc_object (nullptr, 0, nullptr, 0, nullptr);
     make_gc_object (nullptr, 0, nullptr, 0, nullptr);
@@ -229,7 +224,7 @@ concurrent_thread_worker (VPTR arg)
 }
 
 int
-main1 ()
+threaded_tests ()
 {
   thrd_t first_worker = { };
   thrd_t second_worker = { };
@@ -260,91 +255,8 @@ main1 ()
   return global_failure_occurred;
 }
 
-static void
-finalize_string (VPTR data)
-{
-  free (GET ((VPPTR) data));
-  assert_true ("string finalized", true);
-}
-
-int
-main2 ()
-{
-  printf ("Testing GC_ROOT_HERE\n");
-  {
-    VPTR string[1] = { strdup ("test string") };
-    gc_cell_t x = make_gc_object (nullptr, 0, PTR_TO string,
-                                  sizeof string, finalize_string);
-    GC_ROOT_HERE (x);
-    for (size_t i = 0; i != 100; i += 1)
-      gc_step (1);
-    //
-    // The following assertion is likely to segfault if the root is
-    // not working.
-    //
-    assert_true ("string matches",
-                 strcmp (GET ((char PCPCTR) (gc_data (x))),
-                         "test string") == 0);
-  }
-  for (size_t i = 0; i != 100; i += 1)
-    gc_step (1);
-  return 0;
-}
-
-int
-main3 ()
-{
-  printf ("Testing GC_ROOT\n");
-  {
-    VPTR string[1] = { strdup ("test string") };
-    GC_ROOT (gc_cell_t, x,
-             make_gc_object (nullptr, 0, PTR_TO string,
-                             sizeof string, finalize_string));
-    for (size_t i = 0; i != 100; i += 1)
-      gc_step (1);
-    //
-    // The following assertion is likely to segfault if the root is
-    // not working.
-    //
-    assert_true ("string matches",
-                 strcmp (GET ((char PCPCTR) (gc_data (x))),
-                         "test string") == 0);
-  }
-  for (size_t i = 0; i != 100; i += 1)
-    gc_step (1);
-  return 0;
-}
-
-int
-main4 ()
-{
-  printf ("Testing make_rooted_gc_object\n");
-  {
-    VPTR string[1] = { strdup ("test string") };
-    DECLARE_GC_ROOT x =
-      make_rooted_gc_object (nullptr, 0, PTR_TO string,
-                             sizeof string, finalize_string);
-    for (size_t i = 0; i != 100; i += 1)
-      gc_step (1);
-    //
-    // The following assertion is likely to segfault if the root is
-    // not working.
-    //
-    assert_true ("string matches",
-                 strcmp (GET ((char PCPCTR) (gc_data (x.val))),
-                         "test string") == 0);
-  }
-  for (size_t i = 0; i != 100; i += 1)
-    gc_step (1);
-  return 0;
-}
-
 int
 main ()
 {
-  int status1 = main1 ();
-  int status2 = main2 ();
-  int status3 = main3 ();
-  int status4 = main4 ();
-  return (status1 + status2 + status3 + status4);
+  return threaded_tests ();
 }

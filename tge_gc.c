@@ -180,23 +180,18 @@ gc_set_density_threshold (size_t threshold)
 }
 
 TGE_VISIBLE void
-register_gc_root (gc_root_t root,
-                  gc_cell_t cell)
+register_gc_root (gc_cell_t cell)
 {
-  struct gc_root PTR mutable_root =
-    (struct gc_root PTR) root;
-  PUT ((struct gc_cell PPTR) (PTR_TO mutable_root->val)) =
-    (struct gc_cell PTR) cell;
   vector_push (PTR_TO global_gc.roots, (struct gc_cell PTR) cell);
 }
 
 static size_t
-find_root (gc_root_t root)
+find_root (gc_cell_t cell)
 {
   size_t k = ((size_t) -1);
   size_t i = 0;
   while ((k == ((size_t) -1)) * (i != global_gc.roots.length))
-    if (global_gc.roots.data[i] == root->val)
+    if (global_gc.roots.data[i] == cell)
       k = i;
     else
       i += 1;
@@ -204,9 +199,9 @@ find_root (gc_root_t root)
 }
 
 TGE_VISIBLE void
-auto_unregister_gc_root (gc_root_t root)
+deregister_gc_root (gc_cell_t cell)
 {
-  size_t i = find_root (root);
+  size_t i = find_root (cell);
   if (i != ((size_t) -1))
     {
       memmove (PTR_ADD (global_gc.roots.data, i),
@@ -275,18 +270,6 @@ make_gc_object (gc_cell_t PTR children, size_t child_capacity,
   global_gc.allocated_bytes += total_size;
 
   return (gc_cell_t) result;
-}
-
-struct gc_root
-make_rooted_gc_object (gc_cell_t PTR children, size_t child_capacity,
-                       void PTR data, size_t data_size,
-                       gc_finalizer_t PTR finalizer)
-{
-  gc_cell_t cell = make_gc_object (children, child_capacity,
-                                   data, data_size, finalizer);
-  struct gc_root root = { .val = cell };
-  vector_push (PTR_TO global_gc.roots, (struct gc_cell PTR) cell);
-  return root;
 }
 
 static void
