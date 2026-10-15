@@ -176,13 +176,15 @@ make_utf$1_n (const char$1_t PTR s, size_t n)
 {
   const size_t nbytes_header = sizeof (struct utf$1_data__);
   const size_t nbytes_string = n * sizeof (char$1_t);
-  const size_t nbytes = nbytes_header + nbytes_string;
+  const size_t nbytes_nul = sizeof (char$1_t);
+  const size_t nbytes = nbytes_header + nbytes_string + nbytes_nul;
 
   struct utf$1_data__ PTR buf;
   TGE_MALLOCBUF (buf, nbytes);
 
   buf->n__ = n;
   memcpy (buf->s__, s, nbytes_string);
+  buf->s__[n] = 0;
 
   gc_cell_t result = make_gc_object (nullptr, 0, buf, nbytes, free);
 
@@ -252,27 +254,6 @@ utf8_to_utf32 (utf8_t u8)
   free (buf);
   return u32;
 }
-
-//----------------------------------------------------------------------
-
-// TGE_VISIBLE char8_t *
-// utf32_to_c8str (utf32_t u32)
-// {
-//   TGE_GC_LOCAL_ROOT (utf8_t, u8);
-//   u8 = utf32_to_utf8 (u32);
-//   char8_t *s = utf8_to_c8str (u8);
-//   TGE_GC_UNREGISTER_ROOT (u8);
-//   return s;
-// }
-//
-// TGE_VISIBLE char8_t *
-// utf8_to_c8str (utf8_t u8)
-// {
-//   char8_t *s = tge_gc_malloc ((u8->n + 1) * sizeof (char8_t));
-//   memcpy (s, u8->s, u8->n);
-//   s[u8->n] = 0;
-//   return s;
-// }
 
 //----------------------------------------------------------------------
 

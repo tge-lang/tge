@@ -49,48 +49,9 @@ main ()
   assert (utf32_cmp (u32b1, u32a1) < 0);
   assert (utf8_cmp (u8a1, u8b1) > 0);
   assert (utf8_cmp (u8b1, u8a1) < 0);
+
+  assert (strcmp (utf8_str (u8a), "eĥoŝanĝo ĉiuĵaŭde") == 0);
+  assert (strcmp (utf8_str (u8a1), "eĥoŝanĝo ĉiuĵaŭde") == 0);
+  assert (strcmp (utf8_str (u8b), "alpaca") == 0);
+  assert (strcmp (utf8_str (u8b1), "alpaca") == 0);
 }
-
-
-// #define U_STR(S) U ## S
-// #define u8_STR(S) u8 ## S
-//
-// int
-// main (void)
-// {
-//   TGE_GC_LOCAL_ROOT (utf32_t, u32);
-//   TGE_GC_LOCAL_ROOT (utf8_t, u8);
-//   TGE_GC_LOCAL_ROOT (char8_t *, str1);
-//   TGE_GC_LOCAL_ROOT (char8_t *, str2);
-//
-//   u32 = make_utf32 (U_STR ("eĥoŝanĝo ĉiuĵaŭde"));
-//   u8 = make_utf8 (u8_STR ("eĥoŝanĝo ĉiuĵaŭde"));
-//   str1 = utf32_to_c8str (u32);
-//   str2 = utf8_to_c8str (u8);
-//   assert (strcmp (str1, "eĥoŝanĝo ĉiuĵaŭde") == 0);s
-//   assert (strcmp (str1, str2) == 0);
-//   assert (utf32_cmp (u32, u32) == 0);
-//   assert (utf32_cmp (u32, utf8_to_utf32 (u8)) == 0);
-//   assert (utf8_cmp (u8, utf32_to_utf8 (u32)) == 0);
-//   assert (utf32_cmp (make_utf32 (U_STR ("alpaca")), u32) < 0);
-//   assert (utf8_cmp (make_utf8 (u8_STR ("alpaca")), u8) < 0);
-//   assert (utf32_cmp (u32, make_utf32 (U_STR ("alpaca"))) > 0);
-//   assert (utf8_cmp (u8, make_utf8 (u8_STR ("alpaca"))) > 0);
-//
-//   u32 = make_utf32 (U_STR ("eĥoŝanĝo ĉiuĵaŭde"));
-//   u8 = utf32_to_utf8 (u32);
-//   str1 = utf32_to_c8str (u32);
-//   str2 = utf8_to_c8str (u8);
-//   assert (strcmp (str1, str2) == 0);
-//
-//   u8 = make_utf8 (u8_STR ("eĥoŝanĝo ĉiuĵaŭde"));
-//   u32 = utf8_to_utf32 (u8);
-//   str1 = utf32_to_c8str (u32);
-//   str2 = utf8_to_c8str (u8);
-//   assert (strcmp (str1, str2) == 0);
-//
-//   TGE_GC_UNREGISTER_ROOT (u32);
-//   TGE_GC_UNREGISTER_ROOT (u8);
-//   TGE_GC_UNREGISTER_ROOT (str1);
-//   TGE_GC_UNREGISTER_ROOT (str2);
-// }

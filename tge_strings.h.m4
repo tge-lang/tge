@@ -26,6 +26,10 @@
 #include <tge_gc.h>
 
 //----------------------------------------------------------------------
+//
+// Strings have lengths but also, for convenience, have terminating
+// nulls.
+//
 
 //m4_define([:m4_utfNN_declaration:],
 //[:
@@ -61,16 +65,6 @@ utf$1_t make_utf$1 (char$1_t CPTR);
 //m4_utfNN_declaration(8);
 
 //----------------------------------------------------------------------
-
-utf8_t utf32_to_utf8 (utf32_t);
-utf32_t utf8_to_utf32 (utf8_t);
-
-//----------------------------------------------------------------------
-
-// char8_t *utf32_to_c8str (utf32_t);
-// char8_t *utf8_to_c8str (utf8_t);
-
-//----------------------------------------------------------------------
 //
 // The following comparatives are useful for ordered data structures
 // and for equality tests, but are useless for putting words in
@@ -81,6 +75,11 @@ utf32_t utf8_to_utf32 (utf8_t);
 
 int utf32_cmp (utf32_t, utf32_t);
 int utf8_cmp (utf8_t, utf8_t);
+
+//----------------------------------------------------------------------
+
+utf8_t utf32_to_utf8 (utf32_t);
+utf32_t utf8_to_utf32 (utf8_t);
 
 //----------------------------------------------------------------------
 //
