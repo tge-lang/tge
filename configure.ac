@@ -23,8 +23,6 @@ AC_INIT([tge],[0.0.0])
 
 AC_CONFIG_SRCDIR([tge_gc.c])
 
-#AC_CONFIG_HEADERS([config.h])
-
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CANONICAL_BUILD                 dnl On what platform are we compiling?
@@ -77,8 +75,8 @@ CHEM_GNU_C_FLAGS([visible_flags],[-fPIC -fvisibility=default])
 AC_SUBST([VISIBLE_CFLAGS],["${visible_flags}"])
 
 m4_include([c_attributes.ac])
-#m4_include([indent.ac])
 m4_include([uncrustify.ac])
+m4_include([m4.ac])
 
 
 # CHEM_PATH_PROGS_CACHED_AND_PRECIOUS([MERCURIAL],
@@ -93,11 +91,6 @@ m4_include([uncrustify.ac])
 #   ])
 # AM_CONDITIONAL([HAVE_MERCURIAL],
 #         [test "${chem_cv_path_MERCURIAL_found}" = yes])
-
-# CHEM_PROG_GNU_M4
-# if test -z "${GNU_M4}"; then
-#    AC_MSG_ERROR([GNU m4 not found. Perhaps set GNU_M4 to OpenBSD m4.])
-# fi
 
 # CHEM_UNIQUE_ID([UNIQUE_ID])
 
@@ -151,6 +144,7 @@ AC_SUBST([GNU],[])
 CHEM_REQUIRE_GNU_MAKE_IN_PATH
 CHEM_CONFIG_MAKEFILES
 AC_CONFIG_FILES([atconfig])
+#AC_CONFIG_LINKS([tge_strings.c.m4:tge_strings.c.m4.in])
 
 AC_OUTPUT
 

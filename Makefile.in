@@ -46,6 +46,10 @@
 # SPDX-License-Identifier: MIT
 #-----------------------------------------------------------------------
 
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
 
 VPATH = @srcdir@
 am__is_gnu_make = { \
@@ -136,10 +140,11 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ax_check_compile_flag.m4 \
 	$(top_srcdir)/m4/chem_config_makefiles.m4 \
 	$(top_srcdir)/m4/chem_path_progs_cached_and_precious.m4 \
 	$(top_srcdir)/m4/chem_prog_gnu_make.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/c_attributes.ac \
-	$(top_srcdir)/uncrustify.ac $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/chem_prog_m4.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/c_attributes.ac $(top_srcdir)/uncrustify.ac \
+	$(top_srcdir)/m4.ac $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -179,9 +184,11 @@ am__uninstall_files_from_dir = { \
   }
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtge_la_LIBADD =
-am_libtge_la_OBJECTS = tge_xalloc.lo tge_gc.lo spookyhash.lo \
-	tge_strings.lo
-libtge_la_OBJECTS = $(am_libtge_la_OBJECTS)
+am_libtge_la_OBJECTS = tge_xalloc.lo tge_gc.lo spookyhash.lo
+am__objects_1 = tge_strings.lo
+nodist_libtge_la_OBJECTS = $(am__objects_1)
+libtge_la_OBJECTS = $(am_libtge_la_OBJECTS) \
+	$(nodist_libtge_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -237,8 +244,9 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libtge_la_SOURCES) test_defer.c test_spookyhash.c \
-	test_tge_gc.c test_tge_strings.c
+SOURCES = $(libtge_la_SOURCES) $(nodist_libtge_la_SOURCES) \
+	test_defer.c test_spookyhash.c test_tge_gc.c \
+	test_tge_strings.c
 DIST_SOURCES = $(libtge_la_SOURCES) test_defer.c test_spookyhash.c \
 	test_tge_gc.c test_tge_strings.c
 am__can_run_installinfo = \
@@ -265,8 +273,8 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 AM_RECURSIVE_TARGETS = cscope
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/atconfig.in \
-	$(srcdir)/indent.am $(srcdir)/libtge.am $(srcdir)/tests.am \
-	$(top_srcdir)/build-aux/compile \
+	$(srcdir)/libtge.am $(srcdir)/m4.am $(srcdir)/tests.am \
+	$(srcdir)/uncrustify.am $(top_srcdir)/build-aux/compile \
 	$(top_srcdir)/build-aux/config.guess \
 	$(top_srcdir)/build-aux/config.sub \
 	$(top_srcdir)/build-aux/depcomp \
@@ -326,6 +334,7 @@ EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 FILECMD = @FILECMD@
 GNU = @GNU@
+GNU_M4 = @GNU_M4@
 GNU_MAKE = @GNU_MAKE@
 GREP = @GREP@
 INDENT_FLAGS = @INDENT_FLAGS@
@@ -433,18 +442,26 @@ lib_LTLIBRARIES = libtge.la
 CLEANFILES = 
 #EXTRA_DIST += INSTALL
 #EXTRA_DIST += AUTHORS
-DISTCLEANFILES = Makefile GNUmakefile testsuite testsuite.log
+DISTCLEANFILES = Makefile GNUmakefile $(LIBTGE_NODISTSRC) testsuite \
+	testsuite.log
 #EXTRA_DIST += COPYING
-EXTRA_DIST = silent-rules.mk README.adoc $(srcdir)/package.m4 \
-	$(TESTSUITE_DEPS) spookyhash-reference.h
+EXTRA_DIST = silent-rules.mk README.adoc common-macros.m4 \
+	$(LIBTGE_M4SRC) $(srcdir)/package.m4 $(TESTSUITE_DEPS) \
+	spookyhash-reference.h
 EXTRA_SCRIPTS = 
-BUILT_SOURCES = 
+BUILT_SOURCES = $(LIBTGE_NODISTSRC)
 AM_CPPFLAGS = 
 AM_CFLAGS = 
 AM_LIBRS = 
+EXTRA_INDENT_SRC = $(LIBTGE_M4SRC)
+M4 = $(GNU_M4)
+M4FLAGS = -I$(srcdir) -P -s
 libtge_la_SOURCES = c_syntax.h tge_xalloc.c tge_xalloc.h tge_gc.c \
-	tge_gc.h spookyhash.c spookyhash.h persistent_hash_map.h \
-	tge_strings.c tge_strings.h
+	tge_gc.h spookyhash.c spookyhash.h persistent_hash_map.h
+nodist_libtge_la_SOURCES = $(LIBTGE_NODISTSRC)
+libtge_la_DEPENDENCIES = $(LIBTGE_M4SRC)
+LIBTGE_NODISTSRC = tge_strings.c tge_strings.h
+LIBTGE_M4SRC = tge_strings.c.m4 tge_strings.h.m4
 AUTOM4TE = $(SHELL) $(srcdir)/build-aux/missing --run autom4te
 TESTSUITE_DEPS = $(srcdir)/atconfig.in $(srcdir)/package.m4 \
 	$(srcdir)/testsuite.at
@@ -464,7 +481,7 @@ all: $(BUILT_SOURCES)
 .SUFFIXES: .c .lo .o .obj
 am--refresh: GNUmakefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/libtge.am $(srcdir)/indent.am $(srcdir)/tests.am $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/m4.am $(srcdir)/libtge.am $(srcdir)/uncrustify.am $(srcdir)/tests.am $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -486,7 +503,7 @@ GNUmakefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__maybe_remake_depfiles);; \
 	esac;
-$(srcdir)/libtge.am $(srcdir)/indent.am $(srcdir)/tests.am $(am__empty):
+$(srcdir)/m4.am $(srcdir)/libtge.am $(srcdir)/uncrustify.am $(srcdir)/tests.am $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -1054,31 +1071,22 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES
 .DELETE_ON_ERROR:
 
 @GNU@ include $(top_srcdir)/silent-rules.mk
+%.c: %.c.m4 common-macros.m4
+	$(call v,M4)$(M4) $(M4FLAGS) common-macros.m4 $(<) > $(@)
+%.h: %.h.m4 common-macros.m4
+	$(call v,M4)$(M4) $(M4FLAGS) common-macros.m4 $(<) > $(@)
 
-.PHONY: indent
-indent:
+.PHONY: indent uncrustify
+indent uncrustify:
 	for f in $(addprefix $(srcdir)/,$(libtge_la_SOURCES)) \
-				$(addprefix $(srcdir)/,$(CHECK_PROGRAM_SRC)); do \
+				$(addprefix $(srcdir)/,$(CHECK_PROGRAM_SRC)) \
+				$(addprefix $(srcdir)/,$(EXTRA_INDENT_SRC)); do \
 	  if $(UNCRUSTIFY) -q -c $(srcdir)/uncrustify.cfg $${f} -l c; then \
-        mv $${f}{.uncrustify,}; \
+	    mv $${f}{.uncrustify,}; \
 	  else \
 	    rm -f $${f}.uncrustify; \
 	  fi; \
 	done
-
-#.PHONY: indent
-#indent:
-#	for f in $(addprefix $(srcdir)/,$(libtge_la_SOURCES)) \
-#				$(addprefix $(srcdir)/,$(CHECK_PROGRAM_SRC)); do \
-#	  $(INDENT) -l72 --no-tabs \
-#	    -Tutf8_t \
-#	    -Tutf32_t \
-#	    -TFILE \
-#	    -Tthread_local \
-#	    $(INDENT_FLAGS) \
-#	    $(addprefix $(srcdir)/,$(libtge_la_SOURCES)) \
-#	    $${f}; \
-#	done
 $(srcdir)/package.m4: $(top_srcdir)/configure.ac $(srcdir)/Makefile.am
 	$(AWK) \
 	  'BEGIN{printf "# Signature of the current package.\n"; \

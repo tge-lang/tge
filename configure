@@ -657,6 +657,7 @@ ifnGNUmake
 ifGNUmake
 GNU_MAKE
 GNU
+GNU_M4
 UNCRUSTIFY
 VISIBLE_CFLAGS
 INDENT_FLAGS
@@ -811,6 +812,7 @@ LIBS
 CPPFLAGS
 LT_SYS_LIBRARY_PATH
 UNCRUSTIFY
+GNU_M4
 GNU_MAKE'
 
 
@@ -1478,6 +1480,7 @@ Some influential environment variables:
   LT_SYS_LIBRARY_PATH
               User-defined run-time library search path.
   UNCRUSTIFY  GNU uncrustify
+  GNU_M4      GNU m4 macro processor
   GNU_MAKE    GNU Make command
 
 Use these variables to override the choices made by 'configure' or to help
@@ -2548,8 +2551,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-#AC_CONFIG_HEADERS([config.h])
 
 
 
@@ -15529,7 +15530,6 @@ for attribute in noreturn nodiscard unsequenced; do
     INDENT_FLAGS="${INDENT_FLAGS}${INDENT_FLAGS+ }-TTGE_${_attr}"
 done
 
-#m4_include([indent.ac])
 #-----------------------------------------------------------------------
 # SPDX-License-Identifier: MIT
 #-----------------------------------------------------------------------
@@ -15610,6 +15610,101 @@ else
 fi
 }
 
+# local variables:
+# mode: autoconf
+# coding: utf-8
+# end:
+
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
+{ :
+
+   { :;
+
+# Override the cache if the precious variable GNU_M4 is set.
+test -n "${GNU_M4}" && unset ac_cv_path_GNU_M4
+chem_cv_path_GNU_M4_found=yes
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for m4 gm4 gnum4" >&5
+printf %s "checking for m4 gm4 gnum4... " >&6; }
+if test ${ac_cv_path_GNU_M4+y}
+then :
+  printf %s "(cached) " >&6
+else case e in #(
+  e) if test -z "$GNU_M4"; then
+  ac_path_GNU_M4_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_prog in m4 gm4 gnum4
+   do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_GNU_M4="$as_dir$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_GNU_M4" || continue
+
+      if test -n "${GNU_M4}"; then
+         # Bypass the test if the precious variable GNU_M4 is set.
+         ac_cv_path_GNU_M4="${GNU_M4}"
+         ac_path_GNU_M4_found=:
+      else
+         # Run the test.
+
+         if LC_ALL=C LANG=C ${ac_path_GNU_M4} --version 2>&1 | \
+               LC_ALL=C LANG=C ${GREP} -i '^m4 (GNU M4)' 2> /dev/null > /dev/null; then
+            ac_cv_path_GNU_M4="${ac_path_GNU_M4}"
+            ac_path_GNU_M4_found=:
+         fi
+
+      fi
+      $ac_path_GNU_M4_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_GNU_M4"; then
+    :
+  fi
+else
+  ac_cv_path_GNU_M4=$GNU_M4
+fi
+
+      if test -z "${ac_cv_path_GNU_M4}"; then
+         ac_cv_path_GNU_M4="not found"
+         chem_cv_path_GNU_M4_found=no
+      fi
+    ;;
+esac
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_GNU_M4" >&5
+printf "%s\n" "$ac_cv_path_GNU_M4" >&6; }
+if test x"${chem_cv_path_GNU_M4_found}" = x"yes"; then
+   GNU_M4="${ac_cv_path_GNU_M4}"
+else
+   GNU_M4=""
+   # Do not cache the negative result. That way someone can install
+   # the program and have it be discovered, even though they did not
+   # clear a cache entry.
+   unset ac_cv_path_GNU_M4
+fi
+}
+}
+if test -z "${GNU_M4}"; then
+   as_fn_error $? "GNU m4 not found. Perhaps set GNU_M4 to OpenBSD m4." "$LINENO" 5
+fi
+
+# local variables:
+# mode: autoconf
+# coding: utf-8
+# end:
+
 
 
 # CHEM_PATH_PROGS_CACHED_AND_PRECIOUS([MERCURIAL],
@@ -15624,11 +15719,6 @@ fi
 #   ])
 # AM_CONDITIONAL([HAVE_MERCURIAL],
 #         [test "${chem_cv_path_MERCURIAL_found}" = yes])
-
-# CHEM_PROG_GNU_M4
-# if test -z "${GNU_M4}"; then
-#    AC_MSG_ERROR([GNU m4 not found. Perhaps set GNU_M4 to OpenBSD m4.])
-# fi
 
 # CHEM_UNIQUE_ID([UNIQUE_ID])
 
@@ -15812,6 +15902,7 @@ printf "%s\n" "$as_me: WARNING: Please consider installing and using GNU Make:
 }
 ac_config_files="$ac_config_files atconfig"
 
+#AC_CONFIG_LINKS([tge_strings.c.m4:tge_strings.c.m4.in])
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure

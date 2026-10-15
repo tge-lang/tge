@@ -1,0 +1,12 @@
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
+M4 = $(GNU_M4)
+M4FLAGS = -I$(srcdir) -P -s
+%.c: %.c.m4 common-macros.m4
+	$(call v,M4)$(M4) $(M4FLAGS) common-macros.m4 $(<) > $(@)
+%.h: %.h.m4 common-macros.m4
+	$(call v,M4)$(M4) $(M4FLAGS) common-macros.m4 $(<) > $(@)
+
+EXTRA_DIST += common-macros.m4

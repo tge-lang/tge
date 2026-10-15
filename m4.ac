@@ -1,0 +1,13 @@
+#-----------------------------------------------------------------------
+# SPDX-License-Identifier: MIT
+#-----------------------------------------------------------------------
+
+CHEM_PROG_GNU_M4
+if test -z "${GNU_M4}"; then
+   AC_MSG_ERROR([GNU m4 not found. Perhaps set GNU_M4 to OpenBSD m4.])
+fi
+
+# local variables:
+# mode: autoconf
+# coding: utf-8
+# end:

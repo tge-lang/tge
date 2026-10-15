@@ -30,23 +30,26 @@
 //#include <spookyhash.h>
 #include <tge_strings.h>
 
-#if HAVE_GETENTROPY
-#include <unistd.h>
-#endif
+// #if HAVE_GETENTROPY
+// #include <unistd.h>
+// #endif
 
 //----------------------------------------------------------------------
 
-struct utf32_data
+static size_t
+char32_literal_length (char32_t CPTR s)
 {
-  size_t n;
-  char32_t s[];
-};
+  size_t i = 0;
+  while (s[i] != 0)
+    i += 1;
+  return i;
+}
 
-struct utf8_data
+static size_t
+char8_literal_length (char8_t CPTR s)
 {
-  size_t n;
-  char8_t s[];
-};
+  return strlen ((char CPTR) s);
+}
 
 //----------------------------------------------------------------------
 
@@ -62,15 +65,6 @@ initialize_utf8_locale ()
       perror ("creation of C.UTF-8 locale hath failed us");
       abort ();
     }
-}
-
-static size_t
-char32_literal_length (const char32_t *s)
-{
-  size_t i = 0;
-  while (s[i] != 0)
-    i += 1;
-  return i;
 }
 
 static void
@@ -171,95 +165,93 @@ convert_utf8_to_utf32_string (char32_t PTR restrict dst,
 
 //----------------------------------------------------------------------
 
-static void
-make_utf32_root (struct gc_root PTR root, struct utf32_data PTR u32,
-                 const char32_t PTR s, size_t n_codepoint,
-                 size_t nbytes_string, size_t nbytes)
+//m4_define([:m4_utfNN_implementation:],
+//[:
+
+TGE_VISIBLE extern inline size_t utf$1_len (utf$1_t u$1);
+TGE_VISIBLE extern inline char$1_t CPTR utf$1_str (utf$1_t u$1);
+
+TGE_VISIBLE utf$1_t
+make_utf$1_n (const char$1_t PTR s, size_t n)
 {
-  u32->n = n_codepoint;
-  memcpy (u32->s, s, nbytes_string);
-  struct gc_root temp =
-    make_rooted_gc_object (nullptr, 0, u32, nbytes, free);
-  memcpy (root, PTR_TO temp, sizeof temp);
+  const size_t nbytes_header = sizeof (struct utf$1_data__);
+  const size_t nbytes_string = n * sizeof (char$1_t);
+  const size_t nbytes = nbytes_header + nbytes_string;
+
+  struct utf$1_data__ PTR buf;
+  TGE_MALLOCBUF (buf, nbytes);
+
+  buf->n__ = n;
+  memcpy (buf->s__, s, nbytes_string);
+
+  gc_cell_t result = make_gc_object (nullptr, 0, buf, nbytes, free);
+
+  TGE_MALLOCBUF_FREE (buf, nbytes);
+
+  return (utf$1_t) result;
 }
 
-TGE_VISIBLE struct gc_root
-make_utf32_n__aux__ (const char32_t PTR s, size_t n)
+TGE_VISIBLE utf$1_t
+make_utf$1 (const char$1_t *s)
 {
-  constexpr size_t nbuf = 256;
+  return make_utf$1_n (s, char$1_literal_length (s));
+}
 
-  const size_t nbytes_header = sizeof (struct utf32_data);
-  const size_t nbytes_string = n * sizeof (char32_t);
-  const size_t nbytes = nbytes_header + nbytes_string;
-  struct gc_root result;
-  if (nbytes_string <= nbuf)
-    {
-      unsigned char buf[nbuf];
-      make_utf32_root (PTR_TO result, (struct utf32_data PTR) buf,
-                       s, n, nbytes_string, nbytes);
-    }
+TGE_VISIBLE int
+utf$1_cmp (utf$1_t left, utf$1_t right)
+{
+  int cmp;
+  const size_t left_n = utf$1_len (left);
+  const size_t right_n = utf$1_len (right);
+  if (left_n < right_n)
+    cmp = -1;
+  else if (right_n < left_n)
+    cmp = 1;
   else
     {
-      struct utf32_data PTR u32 = tge_xmalloc (nbytes);
-      make_utf32_root (PTR_TO result, u32, s, n, nbytes_string, nbytes);
-      free (u32);
+      char$1_t CPCTR left_s = utf$1_str (left);
+      char$1_t CPCTR right_s = utf$1_str (right);
+      cmp = memcmp (left_s, right_s, left_n * sizeof (char$1_t));
     }
-  return result;
+  return cmp;
 }
 
-// TGE_VISIBLE utf32_t
-// make_utf32 (const char32_t *s)
-// {
-//   return make_utf32_n (s, char32_literal_length (s));
-// }
+// :])
+
+//m4_utfNN_implementation(32);
+//m4_utfNN_implementation(8);
 
 //----------------------------------------------------------------------
 
-// TGE_VISIBLE utf8_t
-// make_utf8_n (const char8_t *s, size_t n)
-// {
-//   struct utf8_data *u8 =
-//     tge_xmalloc (sizeof (struct utf8_data) + (n * sizeof (char8_t)));
-//   u8->n = n;
-//   memcpy (u8->s, s, n * sizeof (char8_t));
-//   void PTR strings[1] = { u8 };
-//   return make_gc_object (utf8_t_type, nullptr, 1,
-//                          strings, 1, finalize_utf8);
-// }
-// 
-// TGE_VISIBLE utf8_t
-// make_utf8 (const char8_t *s)
-// {
-//   return make_utf8_n (s, strlen (s));
-// }
+TGE_VISIBLE utf8_t
+utf32_to_utf8 (utf32_t u32)
+{
+  const size_t u32_n = utf32_len (u32);
+  char32_t CPCTR u32_s = utf32_str (u32);
+  size_t n_buf = u32_n * MB_LEN_MAX;
+  char8_t PTR buf = tge_xmalloc (n_buf * sizeof (char8_t));
+  size_t num_written;
+  convert_utf32_to_utf8_string (buf, n_buf, u32_s, u32_n,
+                                PTR_TO num_written);
+  utf8_t u8 = make_utf8_n (buf, num_written);
+  free (buf);
+  return u8;
+}
 
-//----------------------------------------------------------------------
-
-// TGE_VISIBLE utf8_t
-// utf32_to_utf8 (utf32_t u32)
-// {
-//   size_t n_buf = u32->n * MB_LEN_MAX;
-//   char8_t *buf = tge_xmalloc (n_buf * sizeof (char8_t));
-//   size_t num_written;
-//   convert_utf32_to_utf8_string (buf, n_buf, u32->s, u32->n,
-//                                 PTR_TO num_written);
-//   utf8_t u8 = make_utf8_n (buf, num_written);
-//   free (buf);
-//   return u8;
-// }
-// 
-// TGE_VISIBLE utf32_t
-// utf8_to_utf32 (utf8_t u8)
-// {
-//   size_t n_buf = u8->n;
-//   char32_t *buf = tge_xmalloc (n_buf * sizeof (char32_t));
-//   size_t num_written;
-//   convert_utf8_to_utf32_string (buf, n_buf, u8->s, u8->n,
-//                                 PTR_TO num_written);
-//   utf32_t u32 = make_utf32_n (buf, num_written);
-//   free (buf);
-//   return u32;
-// }
+TGE_VISIBLE utf32_t
+utf8_to_utf32 (utf8_t u8)
+{
+  const size_t u8_n = utf8_len (u8);
+  char8_t CPCTR u8_s = utf8_str (u8);
+  size_t n_buf = u8_n;
+  char32_t PTR buf = tge_xmalloc (n_buf * sizeof (char32_t));
+  size_t num_written;
+  convert_utf8_to_utf32_string (buf, n_buf, u8_s, u8_n,
+                                PTR_TO num_written);
+  utf32_t u32 = make_utf32_n (buf, num_written);
+  free (buf);
+  return u32;
+}
 
 //----------------------------------------------------------------------
 
@@ -280,34 +272,6 @@ make_utf32_n__aux__ (const char32_t PTR s, size_t n)
 //   memcpy (s, u8->s, u8->n);
 //   s[u8->n] = 0;
 //   return s;
-// }
-
-//----------------------------------------------------------------------
-
-// TGE_VISIBLE int
-// utf32_cmp (utf32_t left, utf32_t right)
-// {
-//   int cmp;
-//   if (left->n < right->n)
-//     cmp = -1;
-//   else if (right->n < left->n)
-//     cmp = 1;
-//   else
-//     cmp = memcmp (left->s, right->s, left->n * sizeof (char32_t));
-//   return cmp;
-// }
-// 
-// TGE_VISIBLE int
-// utf8_cmp (utf8_t left, utf8_t right)
-// {
-//   int cmp;
-//   if (left->n < right->n)
-//     cmp = -1;
-//   else if (right->n < left->n)
-//     cmp = 1;
-//   else
-//     cmp = memcmp (left->s, right->s, left->n * sizeof (char8_t));
-//   return cmp;
 // }
 
 //----------------------------------------------------------------------

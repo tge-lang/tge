@@ -12,3 +12,8 @@ CHEM_PATH_PROGS_CACHED_AND_PRECIOUS([UNCRUSTIFY],
       ac_path_UNCRUSTIFY_found=:
     fi
   ])
+
+# local variables:
+# mode: autoconf
+# coding: utf-8
+# end:

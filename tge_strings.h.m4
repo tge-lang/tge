@@ -27,15 +27,40 @@
 
 //----------------------------------------------------------------------
 
-struct utf32;
-typedef struct utf32 *utf32_t;
-utf32_t make_utf32_n (const char32_t *, size_t);
-utf32_t make_utf32 (const char32_t *);
+//m4_define([:m4_utfNN_declaration:],
+//[:
 
-struct utf8;
-typedef struct utf8 *utf8_t;
-utf8_t make_utf8_n (const char8_t *, size_t);
-utf8_t make_utf8 (const char8_t *);
+struct utf$1;
+typedef struct utf$1 CPTR utf$1_t;
+
+struct utf$1_data__
+{
+  size_t n__;
+  char$1_t s__[];
+};
+typedef struct utf$1_data__ CPTR utf$1_data_t__;
+
+inline size_t
+utf$1_len (utf$1_t u$1)
+{
+  return ((utf$1_data_t__) gc_data ((gc_cell_t) u$1))->n__;
+}
+
+inline char$1_t CPTR
+utf$1_str (utf$1_t u$1)
+{
+  return ((utf$1_data_t__) gc_data ((gc_cell_t) u$1))->s__;
+}
+
+utf$1_t make_utf$1_n (char$1_t CPTR, size_t);
+utf$1_t make_utf$1 (char$1_t CPTR);
+
+// :])
+
+//m4_utfNN_declaration(32);
+//m4_utfNN_declaration(8);
+
+//----------------------------------------------------------------------
 
 utf8_t utf32_to_utf8 (utf32_t);
 utf32_t utf8_to_utf32 (utf8_t);

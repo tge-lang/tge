@@ -40,6 +40,7 @@ BUILT_SOURCES =
 AM_CPPFLAGS =
 AM_CFLAGS =
 AM_LIBRS =
+EXTRA_INDENT_SRC =
 
 EXTRA_DIST += silent-rules.mk
 #EXTRA_DIST += COPYING
@@ -50,10 +51,12 @@ EXTRA_DIST += README.adoc
 DISTCLEANFILES += Makefile
 DISTCLEANFILES += GNUmakefile
 
+
 #---------------------------------------------------------------------
 
+include m4.am
 include libtge.am
-include indent.am
+include uncrustify.am
 include tests.am
 
 #---------------------------------------------------------------------
